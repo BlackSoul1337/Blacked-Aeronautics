@@ -6,6 +6,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
 function Get-FullPath([string]$Path) {
     return [System.IO.Path]::GetFullPath($Path)
@@ -183,103 +184,74 @@ $resourcepacksOutput = Join-Path $destinationPackPath 'resourcepacks'
 [System.IO.Directory]::CreateDirectory($modsOutput) | Out-Null
 [System.IO.Directory]::CreateDirectory($resourcepacksOutput) | Out-Null
 
-$modrinthIndexPath = Join-Path $sourceInstancePath 'mrpack\modrinth.index.json'
-if (-not (Test-Path -LiteralPath $modrinthIndexPath -PathType Leaf)) {
-    throw "Source Modrinth index is missing: $modrinthIndexPath"
-}
-$modrinthIndex = Get-Content -LiteralPath $modrinthIndexPath -Raw | ConvertFrom-Json
-
-foreach ($file in $modrinthIndex.files) {
-    $relativePath = [string]$file.path
-    if (-not $relativePath.StartsWith('mods/', [System.StringComparison]::OrdinalIgnoreCase)) {
-        continue
-    }
-
-    $filename = [System.IO.Path]::GetFileName($relativePath)
-    if ($filename -like 'e4mc-*') {
-        continue
-    }
-
-    $sourceJar = Join-Path $sourceMinecraft $relativePath.Replace('/', '\')
-    if (-not (Test-Path -LiteralPath $sourceJar -PathType Leaf)) {
-        throw "A mod from the source index is not installed: $relativePath"
-    }
-
-    $url = [string]$file.downloads[0]
-    $match = [regex]::Match($url, '/data/([^/]+)/versions/([^/]+)/')
-    if (-not $match.Success) {
-        throw "Could not read Modrinth project/version IDs from: $url"
-    }
-
-    $metadataParameters = @{
-        OutputDirectory = $modsOutput
-        Name = [System.IO.Path]::GetFileNameWithoutExtension($filename)
-        Filename = $filename
-        Url = $url
-        Sha512 = [string]$file.hashes.sha512
-        ProjectId = $match.Groups[1].Value
-        VersionId = $match.Groups[2].Value
-    }
-    Write-ModrinthMetadata @metadataParameters
-}
-
-$additionalModrinthMods = @(
-    [pscustomobject]@{
-        Name = 'Allow Offline Players to Join LAN'
-        Filename = 'allowofflinetojoinlan-1.0.0.jar'
-        ProjectId = 'tNe7M4Fa'
-        VersionId = 'CbaUUqoN'
-        Sha512 = 'd0270bcf6c212881f3df0539d09dd0eb21775788fc7e9ad62365d5cf3096f8c18d5d2f6b60c9dc6ee0b1449ab7f56a8abef590cde56f7e980724c025fc90505d'
-        Url = 'https://cdn.modrinth.com/data/tNe7M4Fa/versions/CbaUUqoN/allowofflinetojoinlan-1.0.0.jar'
-    },
-    [pscustomobject]@{
-        Name = 'Quick Skin'
-        Filename = 'Quick Skin - NeoForge - 1.21.1-2.6.2.4.jar'
-        ProjectId = 'zAIE84Ch'
-        VersionId = 'INuI60Al'
-        Sha512 = '7f6eb037aba8df6110e30014217aee343a995f272ab781284c1387e93e15e30cdcd7364d2aaa755c1be7e291df2a484f52a581c100966c2239feeb20e41f964c'
-        Url = 'https://cdn.modrinth.com/data/zAIE84Ch/versions/INuI60Al/Quick%20Skin%20-%20NeoForge%20-%201.21.1-2.6.2.4.jar'
-    },
-    [pscustomobject]@{
-        Name = 'Ragdoll Corpse'
-        Filename = 'ragdoll_corpse-1.21.1-0.3.0.jar'
-        ProjectId = 'uetGbPKW'
-        VersionId = 'DwA6a1pT'
-        Sha512 = '1a65ea95bbaa171611f57a4ef448064a9f0d8c6a13f2d6ef56c1001ef0df469ff42eb471e3d6d6fe3e23141f57f09fae64cc18175db60e8e32bb792531ff82b4'
-        Url = 'https://cdn.modrinth.com/data/uetGbPKW/versions/DwA6a1pT/ragdoll_corpse-1.21.1-0.3.0.jar'
-    },
-    [pscustomobject]@{
-        Name = 'Ragdoll Reactions'
-        Filename = 'ragdoll_reactions-1.21.1-0.7.0.jar'
-        ProjectId = '6awFMFjR'
-        VersionId = 'yx32Af0N'
-        Sha512 = 'aab94063635d8790a33a9eb2191d7fc8b3b38b1b2885c0de96573ab3fbcb9a62b904f1512e6f39c3e13648b65b76f211f1b816608535174aac713b3d61364765'
-        Url = 'https://cdn.modrinth.com/data/6awFMFjR/versions/yx32Af0N/ragdoll_reactions-1.21.1-0.7.0.jar'
-    },
-    [pscustomobject]@{
-        Name = 'Sable Player Ragdoll'
-        Filename = 'sable_player_ragdoll-1.21.1-0.7.5.jar'
-        ProjectId = 'I3mWDgfy'
-        VersionId = 'CyKh8XSr'
-        Sha512 = 'c986f58bc4a4b0d47081e586a9d9c281096abf9c77bcde45f6ae1488e8120e71b79e019d2145ff0a392c5c168f5a8fb2b38907b1f5c6ab9d892622c55dac0ef9'
-        Url = 'https://cdn.modrinth.com/data/I3mWDgfy/versions/CyKh8XSr/sable_player_ragdoll-1.21.1-0.7.5.jar'
-    }
-)
-
-foreach ($mod in $additionalModrinthMods) {
-    $sourceJar = Join-Path $sourceMinecraft ('mods\' + $mod.Filename)
-    if (-not (Test-Path -LiteralPath $sourceJar -PathType Leaf)) {
-        throw "Additional source mod is missing: $($mod.Filename)"
-    }
-    Write-ModrinthMetadata -OutputDirectory $modsOutput -Name $mod.Name -Filename $mod.Filename `
-        -Url $mod.Url -Sha512 $mod.Sha512 -ProjectId $mod.ProjectId -VersionId $mod.VersionId
-}
-
 $createSalvageFilename = 'create_salvage-1.1.0+create6.0.10.jar'
 $createSalvageSource = Join-Path $sourceMinecraft "mods\$createSalvageFilename"
 if (-not (Test-Path -LiteralPath $createSalvageSource -PathType Leaf)) {
     throw "Create: Salvage source JAR is missing: $createSalvageSource"
 }
+
+$sourceModDirectory = Join-Path $sourceMinecraft 'mods'
+$sourceModJars = @(
+    Get-ChildItem -LiteralPath $sourceModDirectory -Filter '*.jar' -File |
+        Where-Object { $_.Name -notlike 'e4mc-*' -and $_.Name -ne $createSalvageFilename } |
+        Sort-Object Name
+)
+if ($sourceModJars.Count -eq 0) {
+    throw "No Modrinth JARs were found in: $sourceModDirectory"
+}
+
+$jarsBySha1 = @{}
+foreach ($sourceJar in $sourceModJars) {
+    $sha1 = (Get-FileHash -LiteralPath $sourceJar.FullName -Algorithm SHA1).Hash.ToLowerInvariant()
+    if ($jarsBySha1.ContainsKey($sha1)) {
+        throw "Duplicate installed mod content: $($sourceJar.Name)"
+    }
+    $jarsBySha1[$sha1] = $sourceJar
+}
+
+$lookupBody = @{
+    hashes = @($jarsBySha1.Keys | Sort-Object)
+    algorithm = 'sha1'
+} | ConvertTo-Json -Depth 4 -Compress
+$lookupHeaders = @{
+    'User-Agent' = 'BlackSoul1337/Blacked-Aeronautics (pack maintenance)'
+}
+$versionsByHash = Invoke-RestMethod -Method Post `
+    -Uri 'https://api.modrinth.com/v2/version_files' `
+    -ContentType 'application/json' `
+    -Headers $lookupHeaders `
+    -Body $lookupBody
+
+$unmatched = New-Object System.Collections.Generic.List[string]
+foreach ($sha1 in @($jarsBySha1.Keys | Sort-Object)) {
+    $sourceJar = $jarsBySha1[$sha1]
+    $versionProperty = $versionsByHash.PSObject.Properties[$sha1]
+    if ($null -eq $versionProperty) {
+        $unmatched.Add($sourceJar.Name)
+        continue
+    }
+
+    $version = $versionProperty.Value
+    $versionFile = @($version.files | Where-Object {
+        $null -ne $_.hashes -and ([string]$_.hashes.sha1).ToLowerInvariant() -eq $sha1
+    }) | Select-Object -First 1
+    if ($null -eq $versionFile) {
+        throw "Modrinth returned a version without the matching file: $($sourceJar.Name)"
+    }
+
+    Write-ModrinthMetadata -OutputDirectory $modsOutput `
+        -Name ([string]$version.name) `
+        -Filename $sourceJar.Name `
+        -Url ([string]$versionFile.url) `
+        -Sha512 ([string]$versionFile.hashes.sha512) `
+        -ProjectId ([string]$version.project_id) `
+        -VersionId ([string]$version.id)
+}
+
+if ($unmatched.Count -gt 0) {
+    throw "Installed JARs are not available on Modrinth. Review their licenses and add them explicitly:`n$($unmatched -join "`n")"
+}
+
 $actualCreateSalvageHash = (Get-FileHash -LiteralPath $createSalvageSource -Algorithm SHA512).Hash.ToLowerInvariant()
 $expectedCreateSalvageHash = 'fda9138c05586a6ee50dbea4b91f509e3a8051bdaf059ed2f227019e50b7462b4b8b2aab08a2e759e6b834061febe145dd2273c128cae9f01ac54f8fdc519093'
 if ($actualCreateSalvageHash -ne $expectedCreateSalvageHash) {
@@ -301,7 +273,7 @@ Write-ModrinthMetadata -OutputDirectory $resourcepacksOutput -Name $resourcePack
 
 $modMetadataCount = @(Get-ChildItem -LiteralPath $modsOutput -Filter '*.pw.toml' -File).Count
 $rawJarCount = @(Get-ChildItem -LiteralPath $modsOutput -Filter '*.jar' -File).Count
-if ($modMetadataCount -ne 161 -or $rawJarCount -ne 1) {
+if ($modMetadataCount -ne $sourceModJars.Count -or $rawJarCount -ne 1) {
     throw "Unexpected imported mod count: $modMetadataCount Modrinth metadata files and $rawJarCount raw JARs."
 }
 

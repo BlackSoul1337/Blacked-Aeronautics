@@ -125,9 +125,9 @@ elseif ((Get-Content -LiteralPath $resourcepackMetadata[0].FullName -Raw) -notma
 if (Test-Path -LiteralPath $packTomlPath -PathType Leaf) {
     $packToml = Get-Content -LiteralPath $packTomlPath -Raw
     foreach ($expected in @(
-        'version = "1.1.2-ely.1"',
+        'version = "1.1.4-ely.1"',
         'minecraft = "1.21.1"',
-        'neoforge = "21.1.229"',
+        'neoforge = "21.1.238"',
         'no-internal-hashes = true'
     )) {
         if (-not $packToml.Contains($expected)) { Add-Failure "pack.toml is missing: $expected" }

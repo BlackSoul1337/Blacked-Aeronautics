@@ -88,6 +88,7 @@ _version = 4
 		# Hidden blocks (IE ores) are ignored.  
 		# Expected Compression Ratio: 0.7
 		worldCompression = "VISUALLY_EQUAL"
+		dataCompression = "Z_STD_BLOCK"
 		#
 		# Enabling this will drastically increase chunk processing time
 		# and you may need to increase your CPU load to handle it.
@@ -170,6 +171,12 @@ _version = 4
 
 		[common.logging.warning]
 			#
+			# If enabled, a message will be displayed in chat if explicit garbage collection 
+			# is disabled. 
+			# This is known to cause out-of-memory issues 
+			# and is better solved with a concurrent garbage collector.
+			showExplicitGcDisabledWarning = true
+			#
 			# If enabled, a chat message will be displayed when DH has too many chunks 
 			# queued for updating.
 			showSlowWorldGenSettingWarnings = true
@@ -177,6 +184,12 @@ _version = 4
 			# If enabled, a chat message will be displayed when DH has too many chunks 
 			# queued for updating.
 			showUpdateQueueOverloadedChatWarning = false
+			#
+			# If enabled, a message will be logged if explicit garbage collection 
+			# is disabled. 
+			# This is known to cause out-of-memory issues 
+			# and is better solved with a concurrent garbage collector.
+			logExplicitGcDisabledWarning = true
 			#
 			# If enabled, a chat message will be displayed if Java doesn't have enough 
 			# memory allocated to run DH well.
@@ -189,6 +202,10 @@ _version = 4
 			# If enabled, a chat message will be displayed when a potentially problematic 
 			# mod is installed alongside DH.
 			showModCompatibilityWarningsOnStartup = true
+			#
+			# If enabled, a chat message will be displayed when DH is using 
+			# a deprecated renderer.
+			showDeprecatedRendererWarningOnStartup = true
 			#
 			# If enabled, a chat message will be displayed if vanilla MC's 
 			# render distance is higher than the recommended amount.
@@ -203,7 +220,7 @@ _version = 4
 			# to cause frame stuttering and/or other issues.
 			logGarbageCollectorWarning = true
 			#
-			# If enabled, a chat message will be displayed if the garbage 
+			# If enabled, a chat message will be displayed in chat if the garbage 
 			# collector Java is currently using is known 
 			# to cause frame stuttering and/or other issues.
 			showGarbageCollectorWarning = true
@@ -452,13 +469,6 @@ _version = 4
 
 			[client.advanced.graphics.culling]
 				#
-				# If false all beacons near the camera won't be drawn to prevent vanilla overdraw. 
-				# If true all beacons will be rendered. 
-				# 
-				# Generally this should be left as true. It's main purpose is for debugging
-				# beacon updating/rendering.
-				disableBeaconDistanceCulling = true
-				#
 				# Determines how far from the camera Distant Horizons will start rendering. 
 				# Measured as a percentage of the vanilla render distance.
 				# 
@@ -471,6 +481,57 @@ _version = 4
 				# Increasing the vanilla render distance increases the effectiveness of this setting.
 				overdrawPrevention = "-1.0"
 				#
+				# Identical to the other frustum culling option
+				# only used when a shader mod is present using the DH API
+				# and the shadow pass is being rendered.
+				# 
+				# Disable this if shadows render incorrectly.
+				disableShadowPassFrustumCulling = false
+				#
+				# A comma separated list of block resource locations that will be replaced by water 
+				# if they're visible on the water's surface.
+				waterSubSurfaceBlockReplacementCsv = "minecraft:kelp,minecraft:tall_seagrass,minecraft:seagrass"
+				#
+				# A comma separated list of block resource locations that won't be rendered by DH. 
+				# Air is always included in this list. 
+				# 
+				# Note:
+				# If you see gaps, or holes you may have to change
+				# worldCompression to [MERGE_SAME_BLOCKS] and re-generate the LODs.
+				ignoredRenderBlockCsv = "minecraft:barrier,minecraft:structure_void,minecraft:light,minecraft:tripwire,minecraft:brown_mushroom"
+				#
+				# A comma separated list of block resource locations that will be removed 
+				# when on top of water.
+				waterSurfaceBlockReplacementCsv = "minecraft:lily_pad"
+				#
+				# Defines what blocks should be rendered as LODs. 
+				# 
+				# NONE: Include all blocks in the LODs 
+				# NON_COLLIDING: Only render solid blocks in the LODs (tall grass, torches, etc. will be ignored)
+				blocksToIgnore = "NON_COLLIDING"
+				#
+				# If true LODs outside the player's camera 
+				# aren't drawn, increasing GPU performance. 
+				# 
+				# If false all LODs are drawn, even those behind 
+				# the player's camera, decreasing GPU performance. 
+				# 
+				# Disable this if you see LODs disappearing at the corners of your vision.
+				disableFrustumCulling = false
+				#
+				# If false all beacons near the camera won't be drawn to prevent vanilla overdraw. 
+				# If true all beacons will be rendered. 
+				# 
+				# Generally this should be left as true. It's main purpose is for debugging
+				# beacon updating/rendering.
+				disableBeaconDistanceCulling = true
+				#
+				# Should the blocks underneath avoided blocks gain the color of the avoided block? 
+				# 
+				# True: a red flower will tint the grass below it red. 
+				# False: skipped blocks will not change color of surface below them.
+				tintWithAvoidedBlocks = true
+				#
 				# If enabled caves won't be rendered. 
 				# 
 				#  Note: for some world types this can cause 
@@ -478,13 +539,6 @@ _version = 4
 				#  Tweaking the caveCullingHeight, can resolve some 
 				#  of those issues.
 				enableCaveCulling = true
-				#
-				# Identical to the other frustum culling option
-				# only used when a shader mod is present using the DH API
-				# and the shadow pass is being rendered.
-				# 
-				# Disable this if shadows render incorrectly.
-				disableShadowPassFrustumCulling = false
 				#
 				# At what Y value should cave culling start? 
 				# Lower this value if you get walls for areas with 0 light.
@@ -504,31 +558,62 @@ _version = 4
 				# This helps reduce issues where Minecraft can't load or
 				# generate chunks fast enough to keep up with DH.
 				reduceOverdrawWithFastMovement = true
+
+			[client.advanced.graphics.texture]
 				#
-				# A comma separated list of block resource locations that will be replaced by water 
-				# if they're visible on the water's surface.
-				waterSubSurfaceBlockReplacementCsv = "minecraft:kelp,minecraft:tall_seagrass,minecraft:seagrass"
-				#
-				# A comma separated list of block resource locations that won't be rendered by DH. 
-				# Air is always included in this list. 
+				# A comma separated list of block resource locations 
+				# that DH will render their sides using the bottom texture. 
+				# Partial matches/incomplete resource locations will also match. 
 				# 
-				# Note:
-				# If you see gaps, or holes you may have to change
-				# worldCompression to [MERGE_SAME_BLOCKS] and re-generate the LODs.
-				ignoredRenderBlockCsv = "minecraft:barrier,minecraft:structure_void,minecraft:light,minecraft:tripwire,minecraft:brown_mushroom"
-				#
-				# A comma separated list of block resource locations that will be removed 
-				# when on top of water.
-				waterSurfaceBlockReplacementCsv = "minecraft:lily_pad"
-				#
-				# If true LODs outside the player's camera 
-				# aren't drawn, increasing GPU performance. 
+				# Example: "minecraft:grass_block,nylium" 
 				# 
-				# If false all LODs are drawn, even those behind 
-				# the player's camera, decreasing GPU performance. 
+				# Changes require a restart.
+				blocksDontUseSideTextureCsv = "grass_block,mycelium,nylium,dirt_path"
+				#
+				# The highest detail level number that can render with block textures. 
+				# At higher detail levels each LOD covers multiple blocks, 
+				# which can essentially make textures smaller than a pixel and therefore invisible. 
+				#  
+				# Larger numbers texture more distant LODs 
+				# but increase memory usage.
+				maxTexturedLodDetailLevel = 2
+				#
+				# If true nearby and zoomed-in LODs will render with their block's 
+				# actual texture instead of a single flat color. 
+				#  
+				# Only applies to high detail LODs where the texture is actually visible, 
+				# distant LODs always use flat colors. 
+				# Some shader packs nay not have an affect.
+				enableTexturedLods = true
+				#
+				# A comma separated list of block resource locations 
+				# that DH won't render textures on. 
+				# Partial matches/incomplete resource locations will also match. 
 				# 
-				# Disable this if you see LODs disappearing at the corners of your vision.
-				disableFrustumCulling = false
+				# Example: "minecraft:grass_block,nylium" 
+				# 
+				# Changes require a restart.
+				blocksDontRenderTextureCsv = "minecraft:bamboo"
+				#
+				# A comma separated list of tag names 
+				# that DH will render their sides using the bottom texture. 
+				# 
+				# Example: "grass_blocks,nylium" 
+				# 
+				# Changes require a restart.
+				blockTagsDontUseSideTextureCsv = "grass_blocks,nylium"
+				#
+				# A comma separated list of block resource locations 
+				# that DH will use rasterization to determine 
+				# the face textures.
+				# 
+				# Can be used to fix issues with mods/blocks where
+				# a side uses just part of a modeled block's texture. 
+				# 
+				# Example: "minecraft:beacon" 
+				# 
+				# Changes require a restart.
+				blocksAlwaysRasterizeTextureCsv = "minecraft:beacon"
 
 			[client.advanced.graphics.noiseTexture]
 				#
@@ -566,6 +651,14 @@ _version = 4
 				# BLAZE_3D - Only supported on MC 1.21.11
 				renderingApi = "AUTO"
 				#
+				# Requires a restart to change. 
+				#  
+				# Options: 
+				# AUTO - changes based on the most likely API for that MC version 
+				# OPEN_GL - The Default for MC 1.21.11 and older (supports Iris shaders) 
+				# BLAZE_3D - The Default for MC 26.1.2 and newer (supports Vulkan)
+				renderingEngine = "AUTO"
+				#
 				# This is the earth size ratio when applying the curvature shader effect. 
 				# Note: Enabling this feature may cause rendering bugs. 
 				# 
@@ -585,7 +678,7 @@ _version = 4
 				# 
 				# Example: "minecraft:overworld,minecraft:the_end"
 				# 
-				# Changes will only be seen when the world is re-loaded.
+				# Changes require a world re-load.
 				dimensionEnabledCloudRenderingCsv = "minecraft:overworld"
 				#
 				# If true LOD clouds will be rendered.
@@ -596,19 +689,25 @@ _version = 4
 				# If false all LOD beacon beams will only ever be 1 block wide.
 				expandDistantBeacons = true
 				#
-				# Sets the maximum height at which beacons will render.This will only affect new beacons coming into LOD render distance.Beacons currently visible in LOD chunks will not be affected.
+				# Sets the maximum height beacons will render up to. 
+				# 
+				# Requires a world re-load to take affect.
 				beaconRenderHeight = 6000
 				#
 				# If true LOD beacon beams will be rendered.
 				enableBeaconRendering = true
 				#
-				# If true non terrain objects will be rendered in DH's terrain. 
-				# This includes beacon beams and clouds.
+				# If true non terrain objects will be rendered by DH. 
+				# i.e. beacon beams and clouds.
 				enableGenericRendering = true
+				#
+				# False = DH will render a single layer of clouds, like vanilla Minecraft. 
+				# True = DH will render 3 layers of clouds at different heights.
+				enableMultiLayerClouds = true
 
 			[client.advanced.graphics.quality]
 				#
-				# What is the maximum detail LODs should be drawn at? 
+				# What is the maximum detail LODs can render at? 
 				# Higher settings will increase memory and GPU usage. 
 				# 
 				# CHUNK: render 1 LOD for each Chunk. 
@@ -617,8 +716,8 @@ _version = 4
 				# TWO_BLOCKS: render 64 LODs for each Chunk. 
 				# BLOCK: render 256 LODs for each Chunk (width of one block). 
 				# 
-				# Lowest Quality: CHUNK
-				# Highest Quality: BLOCK
+				# Fastest: CHUNK
+				# Fanciest: BLOCK
 				maxHorizontalResolution = "TWO_BLOCKS"
 				#
 				# If true LODs will fade away as you get closer to them. 
@@ -637,6 +736,14 @@ _version = 4
 				# 2 = near white
 				brightnessMultiplier = "1.0"
 				#
+				# If true DH will try to use the camera position when 
+				# determining LOD quality drop-off. 
+				# If false DH will use the player's position. 
+				#  
+				# Enabling helps free-cam mods render correctly. 
+				# Disabling helps multi-camera mods render correctly (ie Immersive Portals or camera mods).
+				useCameraPositionForQualityDropOff = true
+				#
 				# How should LODs be shaded? 
 				# 
 				# AUTO: Uses the same side shading as vanilla Minecraft blocks. 
@@ -644,6 +751,13 @@ _version = 4
 				#               Can be used to force LOD shading when using some shaders. 
 				# DISABLED: All LOD sides will be rendered with the same brightness.
 				lodShading = "AUTO"
+				#
+				# How many detail levels zooming in can increase LOD quality by. 
+				# Higher numbers allow stronger zooms to render crisper terrain, 
+				# but will increase memory and GPU usage while zoomed in. 
+				#  
+				# A vanilla spyglass needs 4 detail levels to reach its full quality.
+				maxZoomQualityIncrease = 4
 				#
 				# How saturated LOD colors are. 
 				# 
@@ -657,7 +771,7 @@ _version = 4
 				# Higher options will make the world more accurate, butwill increase memory and GPU usage. 
 				# 
 				# Lowest Quality: HEIGHT_MAP
-				# Highest Quality: EXTREME
+				# Highest Quality: PIXEL_ART
 				verticalQuality = "HEIGHT_MAP"
 				#
 				# What blocks shouldn't be rendered as LODs? 
@@ -667,6 +781,10 @@ _version = 4
 				blocksToIgnore = "NON_COLLIDING"
 				#
 				# The radius of the mod's render distance. (measured in chunks)
+				# 
+				# Note: this is a best effort number. 
+				# The actual render distance may be above or below this number 
+				# depending on your other graphic settings.
 				lodChunkRenderDistanceRadius = 64
 				#
 				# How should the sides and bottom of grass block LODs render? 
@@ -682,20 +800,20 @@ _version = 4
 				# False: skipped blocks will not change color of surface below them.
 				tintWithAvoidedBlocks = true
 				#
-				# This indicates how quickly LODs decrease in quality the further away they are. 
-				# Higher settings will render higher quality fake chunks farther away, 
+				# This indicates how far apart drops in LOD quality are. 
+				# 
+				# Higher settings will increase the distance between drops 
 				# but will increase memory and GPU usage.
 				horizontalQuality = "LOWEST"
 				#
 				# How should LOD transparency be handled. 
 				# 
 				# COMPLETE: LODs will render transparent. 
-				# FAKE: LODs will be opaque, but shaded to match the blocks underneath. 
 				# DISABLED: LODs will be opaque.
 				transparency = "DISABLED"
 				#
 				# This is the same as vanilla Biome Blending settings for Lod area. 
-				#     Note that anything other than '0' will greatly effect Lod building time. 
+				#     Note: anything above '0' will slow down LOD loading time. 
 				# 
 				#     '0' equals to Vanilla Biome Blending of '1x1' or 'OFF', 
 				#     '1' equals to Vanilla Biome Blending of '3x3', 
@@ -708,6 +826,15 @@ _version = 4
 				# SINGLE_PASS: Fades after MC's transparent pass, opaque blocks underwater won't be faded. 
 				# DOUBLE_PASS: Slowest, fades after both MC's opaque and transparent passes, provides the smoothest transition.
 				vanillaFadeMode = "NONE"
+				#
+				# If true LOD quality will increase when the camera is zoomed in, 
+				# IE when using a spyglass or zoom mod. 
+				# 
+				# Only LODs visible through the camera view are affected. 
+				# 
+				# When zoomed in LODs will load to the same detail level 
+				# they would have if you were close to them.
+				increaseQualityWhenZoomedIn = true
 
 			[client.advanced.graphics.fog]
 				#

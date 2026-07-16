@@ -1,0 +1,13 @@
+name = "TungstenEquipment 1.3.4 Fabric"
+filename = "Tungsten_Equipment-1.3.4-Fabric.jar.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/mVqSwavE/versions/SKBMGL8t/Tungsten_Equipment-1.3.4-Fabric.jar.jar"
+hash-format = "sha512"
+hash = "198bfe521547825f43fb4c852455247c5ca65239e1370f945dbaccd023eea993246feab8dd50ed8bf4ea9695f5e666d8a0281ca6ed5dfc20cc2a6f94e5ccbb5e"
+
+[update]
+[update.modrinth]
+mod-id = "mVqSwavE"
+version = "SKBMGL8t"

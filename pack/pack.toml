@@ -1,16 +1,16 @@
 name = "Blacked Aeronautics"
 author = "BlackSoul1337; based on Aeronautics - Create Customised"
-version = "1.1.2-ely.1"
+version = "1.1.4-ely.1"
 pack-format = "packwiz:1.1.0"
 
 [index]
 file = "index.toml"
 hash-format = "sha256"
-hash = "536db2c03f3b919bdde3f9b463ea073896d2cc5e9234ba5149d1a9867ddf8273"
+hash = "0ab334e39bf4795d136fdeeec91a7118fc4d689fae8573d6e94af3f3464ba117"
 
 [versions]
 minecraft = "1.21.1"
-neoforge = "21.1.229"
+neoforge = "21.1.238"
 
 [options]
 acceptable-game-versions = ["1.21.1"]
