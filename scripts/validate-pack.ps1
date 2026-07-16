@@ -87,15 +87,19 @@ foreach ($file in $allFiles | Where-Object { $textExtensions -contains $_.Extens
 $modsDirectory = Join-Path $packRootFullPath 'mods'
 $modMetadata = @(Get-ChildItem -LiteralPath $modsDirectory -Filter '*.pw.toml' -File)
 $rawModJars = @(Get-ChildItem -LiteralPath $modsDirectory -Filter '*.jar' -File)
-if ($rawModJars.Count -ne 1) { Add-Failure "Expected one redistributable raw mod JAR, found $($rawModJars.Count)." }
-if ($rawModJars.Count -eq 1 -and $rawModJars[0].Name -ne 'create_salvage-1.1.0+create6.0.10.jar') {
-    Add-Failure "Unexpected raw mod JAR: $($rawModJars[0].Name)"
+$approvedRawMods = @{
+    'create_salvage-1.1.0+create6.0.10.jar' = 'fda9138c05586a6ee50dbea4b91f509e3a8051bdaf059ed2f227019e50b7462b4b8b2aab08a2e759e6b834061febe145dd2273c128cae9f01ac54f8fdc519093'
+    'reveal-1.0.0.jar' = '8c2c1baffa60d680d09e3bfeddeb5c34c6f0a1f8ae70a7f941fb51bb66de8e539a7db855de229bbc5a3c4b79535f6b3b9d1373be3941f7c9df51dfe1596428e2'
 }
-if ($rawModJars.Count -eq 1 -and $rawModJars[0].Name -eq 'create_salvage-1.1.0+create6.0.10.jar') {
-    $expectedRawJarHash = 'fda9138c05586a6ee50dbea4b91f509e3a8051bdaf059ed2f227019e50b7462b4b8b2aab08a2e759e6b834061febe145dd2273c128cae9f01ac54f8fdc519093'
-    $actualRawJarHash = (Get-FileHash -LiteralPath $rawModJars[0].FullName -Algorithm SHA512).Hash.ToLowerInvariant()
-    if ($actualRawJarHash -ne $expectedRawJarHash) {
-        Add-Failure 'The redistributable Create: Salvage JAR does not match the reviewed file.'
+if ($rawModJars.Count -ne $approvedRawMods.Count) { Add-Failure "Expected $($approvedRawMods.Count) approved raw mod JARs, found $($rawModJars.Count)." }
+foreach ($rawModJar in $rawModJars) {
+    if (-not $approvedRawMods.ContainsKey($rawModJar.Name)) {
+        Add-Failure "Unexpected raw mod JAR: $($rawModJar.Name)"
+        continue
+    }
+    $actualRawJarHash = (Get-FileHash -LiteralPath $rawModJar.FullName -Algorithm SHA512).Hash.ToLowerInvariant()
+    if ($actualRawJarHash -ne $approvedRawMods[$rawModJar.Name]) {
+        Add-Failure "The approved raw mod JAR does not match the reviewed file: $($rawModJar.Name)"
     }
 }
 if ($modMetadata.Count -lt 1) {

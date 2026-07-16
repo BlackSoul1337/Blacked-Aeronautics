@@ -2337,6 +2337,10 @@ hash = "9cc3830d4dbe361047f06bf9858506c1149ab75650c47d403bbca5cfd7d15b01"
 metafile = true
 
 [[files]]
+file = "mods/reveal-1.0.0.jar"
+hash = "bd410142e92a4f3e1deda4153f8bd1c3a9c063126bfdbab5f72d8f48446688c2"
+
+[[files]]
 file = "mods/sHO3MhQx-struts-1.2.7.pw.toml"
 hash = "32590aa25b7a69aaa059306b865c011d43beb3b2bac387c4f1fae37c51c5383b"
 metafile = true

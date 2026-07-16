@@ -184,16 +184,23 @@ $resourcepacksOutput = Join-Path $destinationPackPath 'resourcepacks'
 [System.IO.Directory]::CreateDirectory($modsOutput) | Out-Null
 [System.IO.Directory]::CreateDirectory($resourcepacksOutput) | Out-Null
 
-$createSalvageFilename = 'create_salvage-1.1.0+create6.0.10.jar'
-$createSalvageSource = Join-Path $sourceMinecraft "mods\$createSalvageFilename"
-if (-not (Test-Path -LiteralPath $createSalvageSource -PathType Leaf)) {
-    throw "Create: Salvage source JAR is missing: $createSalvageSource"
-}
+$approvedRawMods = @(
+    [pscustomobject]@{
+        Filename = 'create_salvage-1.1.0+create6.0.10.jar'
+        Sha512 = 'fda9138c05586a6ee50dbea4b91f509e3a8051bdaf059ed2f227019e50b7462b4b8b2aab08a2e759e6b834061febe145dd2273c128cae9f01ac54f8fdc519093'
+        Review = 'MIT-licensed binary'
+    }
+    [pscustomobject]@{
+        Filename = 'reveal-1.0.0.jar'
+        Sha512 = '8c2c1baffa60d680d09e3bfeddeb5c34c6f0a1f8ae70a7f941fb51bb66de8e539a7db855de229bbc5a3c4b79535f6b3b9d1373be3941f7c9df51dfe1596428e2'
+        Review = 'author-authorized binary'
+    }
+)
 
 $sourceModDirectory = Join-Path $sourceMinecraft 'mods'
 $sourceModJars = @(
     Get-ChildItem -LiteralPath $sourceModDirectory -Filter '*.jar' -File |
-        Where-Object { $_.Name -notlike 'e4mc-*' -and $_.Name -ne $createSalvageFilename } |
+        Where-Object { $_.Name -notlike 'e4mc-*' -and $_.Name -notin $approvedRawMods.Filename } |
         Sort-Object Name
 )
 if ($sourceModJars.Count -eq 0) {
@@ -252,12 +259,17 @@ if ($unmatched.Count -gt 0) {
     throw "Installed JARs are not available on Modrinth. Review their licenses and add them explicitly:`n$($unmatched -join "`n")"
 }
 
-$actualCreateSalvageHash = (Get-FileHash -LiteralPath $createSalvageSource -Algorithm SHA512).Hash.ToLowerInvariant()
-$expectedCreateSalvageHash = 'fda9138c05586a6ee50dbea4b91f509e3a8051bdaf059ed2f227019e50b7462b4b8b2aab08a2e759e6b834061febe145dd2273c128cae9f01ac54f8fdc519093'
-if ($actualCreateSalvageHash -ne $expectedCreateSalvageHash) {
-    throw 'Create: Salvage JAR does not match the reviewed MIT-licensed binary.'
+foreach ($approvedRawMod in $approvedRawMods) {
+    $sourcePath = Join-Path $sourceModDirectory $approvedRawMod.Filename
+    if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) {
+        throw "Approved raw mod source JAR is missing: $($approvedRawMod.Filename)"
+    }
+    $actualHash = (Get-FileHash -LiteralPath $sourcePath -Algorithm SHA512).Hash.ToLowerInvariant()
+    if ($actualHash -ne $approvedRawMod.Sha512) {
+        throw "Approved raw mod JAR does not match the reviewed $($approvedRawMod.Review): $($approvedRawMod.Filename)"
+    }
+    Copy-Item -LiteralPath $sourcePath -Destination (Join-Path $modsOutput $approvedRawMod.Filename) -Force
 }
-Copy-Item -LiteralPath $createSalvageSource -Destination (Join-Path $modsOutput $createSalvageFilename) -Force
 
 $resourcePack = [pscustomobject]@{
     Name = 'Default Dark Mode'
@@ -273,8 +285,8 @@ Write-ModrinthMetadata -OutputDirectory $resourcepacksOutput -Name $resourcePack
 
 $modMetadataCount = @(Get-ChildItem -LiteralPath $modsOutput -Filter '*.pw.toml' -File).Count
 $rawJarCount = @(Get-ChildItem -LiteralPath $modsOutput -Filter '*.jar' -File).Count
-if ($modMetadataCount -ne $sourceModJars.Count -or $rawJarCount -ne 1) {
+if ($modMetadataCount -ne $sourceModJars.Count -or $rawJarCount -ne $approvedRawMods.Count) {
     throw "Unexpected imported mod count: $modMetadataCount Modrinth metadata files and $rawJarCount raw JARs."
 }
 
-Write-Host "Imported $modMetadataCount Modrinth mods, 1 MIT JAR, cleaned configs, KubeJS and Default Dark Mode."
+Write-Host "Imported $modMetadataCount Modrinth mods, $rawJarCount approved raw JARs, cleaned configs, KubeJS and Default Dark Mode."
