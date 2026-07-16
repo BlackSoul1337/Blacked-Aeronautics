@@ -1,5 +1,5 @@
 #define MyAppName "Blacked Aeronautics"
-#define MyAppExeName "elyprismlauncher.exe"
+#define MyAppExeName "Blacked Aeronautics.exe"
 #define MyAppVersion GetEnv("BLACKED_VERSION")
 #define PortableSource GetEnv("BLACKED_PORTABLE_SOURCE")
 #define SetupOutputDir GetEnv("BLACKED_SETUP_OUTPUT")
@@ -47,7 +47,9 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "Создать ярлык на рабочем столе"; GroupDescription: "Дополнительные ярлыки:"; Flags: unchecked
 
 [Files]
-Source: "{#PortableSource}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#PortableSource}\*"; DestDir: "{app}"; Excludes: "\elyprismlauncher.cfg,\instances\Blacked-Aeronautics\instance.cfg"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#PortableSource}\elyprismlauncher.cfg"; DestDir: "{app}"; Flags: onlyifdoesntexist
+Source: "{#PortableSource}\instances\Blacked-Aeronautics\instance.cfg"; DestDir: "{app}\instances\Blacked-Aeronautics"; Flags: onlyifdoesntexist
 
 [Icons]
 Name: "{group}\Blacked Aeronautics"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"

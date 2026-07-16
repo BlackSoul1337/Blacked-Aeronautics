@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$Version = '1.1.2-ely.1',
+    [string]$Version = '1.1.3-ely.1',
     [string]$PortableDirectory,
     [string]$OutputRoot = (Join-Path $PSScriptRoot '..\dist'),
     [string]$InnoCompiler
@@ -22,6 +22,7 @@ $portablePath = Get-FullPath $PortableDirectory
 $installerDefinition = Join-Path $repoRoot 'installer\Blacked-Aeronautics.iss'
 
 foreach ($requiredFile in @(
+    (Join-Path $portablePath 'Blacked Aeronautics.exe'),
     (Join-Path $portablePath 'elyprismlauncher.exe'),
     (Join-Path $portablePath 'java\bin\javaw.exe'),
     (Join-Path $portablePath 'portable.txt'),

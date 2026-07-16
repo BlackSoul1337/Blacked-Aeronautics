@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$Version = '1.1.2-ely.1',
+    [string]$Version = '1.1.3-ely.1',
     [string]$LauncherSource = (Join-Path $PSScriptRoot '..\elyprism'),
     [string]$JavaSource = (Join-Path $PSScriptRoot '..\jdk-21.0.11+10'),
     [string]$TemplateSource = (Join-Path $PSScriptRoot '..\launcher-template'),
@@ -88,13 +88,32 @@ Copy-DirectoryContents $javaPath (Join-Path $portableDirectory 'java')
 Copy-Item -LiteralPath (Join-Path $repoRoot 'THIRD_PARTY_NOTICES.md') -Destination $portableDirectory -Force
 Copy-Item -LiteralPath (Join-Path $repoRoot 'LICENSE') -Destination $portableDirectory -Force
 
+$wrapperExe = Join-Path $portableDirectory 'Blacked Aeronautics.exe'
+& (Join-Path $PSScriptRoot 'build-updater.ps1') `
+    -OutputPath $wrapperExe `
+    -IconSource (Join-Path $portableDirectory 'elyprismlauncher.exe')
+if ($LASTEXITCODE -ne 0) {
+    throw "Updater build failed with exit code $LASTEXITCODE"
+}
+
+$updateConfig = [ordered]@{
+    version = $Version
+    repository = 'BlackSoul1337/Blacked-Aeronautics'
+    launcher = 'elyprismlauncher.exe'
+} | ConvertTo-Json
+[System.IO.File]::WriteAllText(
+    (Join-Path $portableDirectory 'blacked-update.json'),
+    $updateConfig,
+    [System.Text.UTF8Encoding]::new($false)
+)
+
 $launcherExe = Join-Path $portableDirectory 'elyprismlauncher.exe'
 $javaExe = Join-Path $portableDirectory 'java\bin\java.exe'
 $javawExe = Join-Path $portableDirectory 'java\bin\javaw.exe'
 $bootstrapJar = Join-Path $portableDirectory 'instances\Blacked-Aeronautics\minecraft\packwiz-installer-bootstrap.jar'
 $portableMarker = Join-Path $portableDirectory 'portable.txt'
 
-foreach ($requiredFile in @($launcherExe, $javaExe, $javawExe, $bootstrapJar, $portableMarker)) {
+foreach ($requiredFile in @($wrapperExe, $launcherExe, $javaExe, $javawExe, $bootstrapJar, $portableMarker)) {
     if (-not (Test-Path -LiteralPath $requiredFile -PathType Leaf)) {
         throw "Portable build is missing: $requiredFile"
     }
@@ -132,6 +151,28 @@ foreach ($file in $configurationFiles) {
         throw "Absolute local path leaked into the portable build: $($file.FullName)"
     }
 }
+
+$seedFiles = @(
+    'elyprismlauncher.cfg',
+    'instances/Blacked-Aeronautics/instance.cfg'
+)
+$manifestFiles = Get-ChildItem -LiteralPath $portableDirectory -Recurse -File -Force | ForEach-Object {
+    $relativePath = $_.FullName.Substring($portableDirectory.TrimEnd('\', '/').Length + 1).Replace('\', '/')
+    [ordered]@{
+        path = $relativePath
+        sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+        mode = if ($relativePath -in $seedFiles) { 'seed' } else { 'replace' }
+    }
+}
+$distributionManifest = [ordered]@{
+    version = $Version
+    files = @($manifestFiles)
+} | ConvertTo-Json -Depth 5
+[System.IO.File]::WriteAllText(
+    (Join-Path $portableDirectory 'distribution-manifest.json'),
+    $distributionManifest,
+    [System.Text.UTF8Encoding]::new($false)
+)
 
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
