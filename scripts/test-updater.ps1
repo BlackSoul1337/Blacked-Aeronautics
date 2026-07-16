@@ -90,11 +90,50 @@ try {
     $program = $assembly.GetType('BlackedAeronauticsUpdater.Program', $true)
     $compare = $program.GetMethod('CompareVersions', [System.Reflection.BindingFlags]'Static, NonPublic')
     $quote = $program.GetMethod('Quote', [System.Reflection.BindingFlags]'Static, NonPublic')
+    $extractNeoForge = $program.GetMethod('ExtractNeoForgeVersion', [System.Reflection.BindingFlags]'Static, NonPublic')
+    $updateNeoForge = $program.GetMethod('UpdateNeoForgeManifest', [System.Reflection.BindingFlags]'Static, NonPublic')
     if ($compare.Invoke($null, @('1.1.3-ely.2', '1.1.3-ely.1')) -le 0) {
         throw 'Updater version comparison test failed.'
     }
     if ($quote.Invoke($null, @('C:\Folder with spaces\file.exe')) -ne '"C:\Folder with spaces\file.exe"') {
         throw 'Updater Windows argument quoting test failed.'
+    }
+    $samplePack = @'
+[versions]
+minecraft = "1.21.1"
+neoforge = "21.1.238"
+
+[options]
+'@
+    $packArguments = New-Object 'System.Object[]' 1
+    $packArguments[0] = $samplePack.PSObject.BaseObject
+    if ($extractNeoForge.Invoke($null, $packArguments) -ne '21.1.238') {
+        throw 'Updater NeoForge version parser test failed.'
+    }
+
+    $instanceDirectory = Join-Path $testRoot 'instance'
+    [System.IO.Directory]::CreateDirectory($instanceDirectory) | Out-Null
+    $instanceManifest = Join-Path $instanceDirectory 'mmc-pack.json'
+    Write-Utf8Json $instanceManifest ([ordered]@{
+        components = @(
+            [ordered]@{ uid = 'net.minecraft'; version = '1.21.1' },
+            [ordered]@{ uid = 'net.neoforged'; version = '21.1.229'; cachedVersion = '21.1.229' }
+        )
+        formatVersion = 1
+    })
+    $manifestArguments = New-Object 'System.Object[]' 2
+    $manifestArguments[0] = $instanceManifest.PSObject.BaseObject
+    $manifestArguments[1] = '21.1.238'
+    if (-not $updateNeoForge.Invoke($null, $manifestArguments)) {
+        throw 'Updater NeoForge manifest test did not report a change.'
+    }
+    $updatedManifest = Get-Content -LiteralPath $instanceManifest -Raw | ConvertFrom-Json
+    $updatedNeoForge = @($updatedManifest.components | Where-Object { $_.uid -eq 'net.neoforged' })[0]
+    if ($updatedNeoForge.version -ne '21.1.238' -or $updatedNeoForge.cachedVersion -ne '21.1.238') {
+        throw 'Updater NeoForge manifest test failed.'
+    }
+    if ($updateNeoForge.Invoke($null, $manifestArguments)) {
+        throw 'Updater NeoForge manifest test reports a change for the current version.'
     }
 
     Write-Host 'Updater tests passed.'

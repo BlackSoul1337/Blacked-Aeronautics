@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$Version = '1.1.3-ely.1',
+    [string]$Version = '1.1.4-ely.1',
     [string]$PortableDirectory,
     [string]$OutputRoot = (Join-Path $PSScriptRoot '..\dist'),
     [string]$InnoCompiler

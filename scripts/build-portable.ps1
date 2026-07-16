@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$Version = '1.1.3-ely.1',
+    [string]$Version = '1.1.4-ely.1',
     [string]$LauncherSource = (Join-Path $PSScriptRoot '..\elyprism'),
     [string]$JavaSource = (Join-Path $PSScriptRoot '..\jdk-21.0.11+10'),
     [string]$TemplateSource = (Join-Path $PSScriptRoot '..\launcher-template'),
@@ -100,6 +100,7 @@ $updateConfig = [ordered]@{
     version = $Version
     repository = 'BlackSoul1337/Blacked-Aeronautics'
     launcher = 'elyprismlauncher.exe'
+    packUrl = 'https://blacksoul1337.github.io/Blacked-Aeronautics/pack.toml'
 } | ConvertTo-Json
 [System.IO.File]::WriteAllText(
     (Join-Path $portableDirectory 'blacked-update.json'),

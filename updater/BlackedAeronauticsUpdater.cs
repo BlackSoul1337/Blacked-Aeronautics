@@ -29,6 +29,7 @@ namespace BlackedAeronauticsUpdater
         public string version { get; set; }
         public string repository { get; set; }
         public string launcher { get; set; }
+        public string packUrl { get; set; }
     }
 
     internal sealed class ReleaseInfo
@@ -207,6 +208,7 @@ namespace BlackedAeronauticsUpdater
             string configPath = Path.Combine(root, ConfigName);
             UpdateConfig config = ReadJson<UpdateConfig>(configPath);
             ValidateConfig(config);
+            TrySyncLoaderVersion(root, config.packUrl);
 
             List<string> forwarded = new List<string>(args);
             bool skipOnce = forwarded.Remove("--skip-update-once");
@@ -313,6 +315,113 @@ namespace BlackedAeronauticsUpdater
                     throw new InvalidDataException("GitHub вернул неподходящий Release.");
                 return release;
             }
+        }
+
+        private static void TrySyncLoaderVersion(string root, string packUrl)
+        {
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(packUrl);
+                request.Method = "GET";
+                request.UserAgent = UserAgent("loader-sync");
+                request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                request.Timeout = 10000;
+                request.ReadWriteTimeout = 10000;
+
+                string packToml;
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                using (Stream stream = response.GetResponseStream())
+                using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
+                    packToml = reader.ReadToEnd();
+
+                string neoForgeVersion = ExtractNeoForgeVersion(packToml);
+                string manifestPath = SafePath(
+                    root,
+                    "instances/Blacked-Aeronautics/mmc-pack.json");
+                UpdateNeoForgeManifest(manifestPath, neoForgeVersion);
+            }
+            catch
+            {
+                // A loader check must never prevent the already installed launcher from opening.
+            }
+        }
+
+        private static string ExtractNeoForgeVersion(string packToml)
+        {
+            if (string.IsNullOrWhiteSpace(packToml))
+                throw new InvalidDataException("Опубликованный pack.toml пуст.");
+
+            Match section = Regex.Match(
+                packToml.Replace("\r\n", "\n"),
+                "(?ms)^\\[versions\\]\\s*$\\n(?<body>.*?)(?=^\\[|\\z)",
+                RegexOptions.CultureInvariant);
+            if (!section.Success)
+                throw new InvalidDataException("В pack.toml отсутствует раздел versions.");
+
+            Match version = Regex.Match(
+                section.Groups["body"].Value,
+                "(?m)^neoforge\\s*=\\s*\"([^\"]+)\"\\s*$",
+                RegexOptions.CultureInvariant);
+            if (!version.Success ||
+                !Regex.IsMatch(version.Groups[1].Value, "^[0-9]+\\.[0-9]+\\.[0-9A-Za-z.+-]+$", RegexOptions.CultureInvariant))
+                throw new InvalidDataException("В pack.toml указана неверная версия NeoForge.");
+            return version.Groups[1].Value;
+        }
+
+        private static bool UpdateNeoForgeManifest(string manifestPath, string version)
+        {
+            if (!File.Exists(manifestPath))
+                return false;
+
+            Dictionary<string, object> document =
+                Json.DeserializeObject(File.ReadAllText(manifestPath, Encoding.UTF8)) as Dictionary<string, object>;
+            if (document == null || !document.ContainsKey("components"))
+                throw new InvalidDataException("Не удалось прочитать компоненты инстанса.");
+
+            object[] components = document["components"] as object[];
+            if (components == null)
+                throw new InvalidDataException("Не удалось прочитать компоненты инстанса.");
+
+            Dictionary<string, object> neoForge = null;
+            foreach (object item in components)
+            {
+                Dictionary<string, object> component = item as Dictionary<string, object>;
+                if (component != null && component.ContainsKey("uid") &&
+                    string.Equals(Convert.ToString(component["uid"], CultureInfo.InvariantCulture), "net.neoforged", StringComparison.Ordinal))
+                {
+                    neoForge = component;
+                    break;
+                }
+            }
+            if (neoForge == null)
+                throw new InvalidDataException("В инстансе отсутствует компонент NeoForge.");
+
+            string current = neoForge.ContainsKey("version")
+                ? Convert.ToString(neoForge["version"], CultureInfo.InvariantCulture)
+                : string.Empty;
+            if (string.Equals(current, version, StringComparison.Ordinal))
+                return false;
+
+            neoForge["version"] = version;
+            if (neoForge.ContainsKey("cachedVersion"))
+                neoForge["cachedVersion"] = version;
+
+            string temporary = manifestPath + ".update-" + Guid.NewGuid().ToString("N");
+            try
+            {
+                File.WriteAllText(temporary, Json.Serialize(document), new UTF8Encoding(false));
+                File.Copy(temporary, manifestPath, true);
+            }
+            finally
+            {
+                try
+                {
+                    if (File.Exists(temporary))
+                        File.Delete(temporary);
+                }
+                catch { }
+            }
+            return true;
         }
 
         private static ReleaseAsset FindAsset(ReleaseInfo release, string version, string suffix)
@@ -629,8 +738,14 @@ namespace BlackedAeronauticsUpdater
         {
             if (config == null || string.IsNullOrWhiteSpace(config.version) ||
                 string.IsNullOrWhiteSpace(config.repository) || string.IsNullOrWhiteSpace(config.launcher) ||
+                string.IsNullOrWhiteSpace(config.packUrl) ||
                 !Regex.IsMatch(config.repository, "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$", RegexOptions.CultureInvariant))
                 throw new InvalidDataException("Настройки обновления повреждены.");
+            Uri parsedPackUrl;
+            if (!Uri.TryCreate(config.packUrl, UriKind.Absolute, out parsedPackUrl) ||
+                parsedPackUrl.Scheme != Uri.UriSchemeHttps ||
+                !string.Equals(parsedPackUrl.Host, "blacksoul1337.github.io", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidDataException("Адрес обновления сборки повреждён.");
             SafePath(AppDomain.CurrentDomain.BaseDirectory, config.launcher);
         }
 
