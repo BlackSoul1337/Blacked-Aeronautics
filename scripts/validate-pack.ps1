@@ -1,0 +1,173 @@
+[CmdletBinding()]
+param(
+    [string]$PackRoot = (Join-Path $PSScriptRoot '..\pack')
+)
+
+$ErrorActionPreference = 'Stop'
+Set-StrictMode -Version Latest
+
+$packRootFullPath = [System.IO.Path]::GetFullPath($PackRoot)
+$failures = New-Object System.Collections.Generic.List[string]
+
+function Add-Failure([string]$Message) {
+    $script:failures.Add($Message)
+}
+
+function Get-RelativePackPath([string]$FullName) {
+    return $FullName.Substring($packRootFullPath.TrimEnd('\', '/').Length + 1).Replace('\', '/')
+}
+
+if (-not (Test-Path -LiteralPath $packRootFullPath -PathType Container)) {
+    throw "Pack directory was not found: $packRootFullPath"
+}
+
+$packTomlPath = Join-Path $packRootFullPath 'pack.toml'
+$indexPath = Join-Path $packRootFullPath 'index.toml'
+if (-not (Test-Path -LiteralPath $packTomlPath -PathType Leaf)) { Add-Failure 'pack.toml is missing.' }
+if (-not (Test-Path -LiteralPath $indexPath -PathType Leaf)) { Add-Failure 'index.toml is missing.' }
+
+$allFiles = @(Get-ChildItem -LiteralPath $packRootFullPath -Recurse -File -Force)
+foreach ($file in $allFiles) {
+    $relativePath = Get-RelativePackPath $file.FullName
+    $lowerPath = $relativePath.ToLowerInvariant()
+    if ($lowerPath -match '(^|/)(saves|logs|\.connector|\.index)(/|$)' -or
+        $lowerPath -match '(^|/)(servers\.dat|mods\.rar|username-cache\.json|player-volumes\.properties)$' -or
+        $lowerPath -match '\.bak$' -or
+        $lowerPath -match '^config/one-click-join$' -or
+        $lowerPath -match '^config/structurify/structurify_backup_.*\.json$' -or
+        $lowerPath -match '^config/quickskin/uploads/') {
+        Add-Failure "Forbidden personal/cache file is present: $relativePath"
+    }
+    if ($lowerPath -match 'e4mc') {
+        Add-Failure "e4mc must not be included: $relativePath"
+    }
+}
+
+$voiceChatClientPath = Join-Path $packRootFullPath 'config\voicechat\voicechat-client.properties'
+if (Test-Path -LiteralPath $voiceChatClientPath -PathType Leaf) {
+    $voiceChatClient = Get-Content -LiteralPath $voiceChatClientPath -Raw
+    foreach ($expectedSetting in @('onboarding_finished=false', 'microphone=', 'speaker=')) {
+        if ($voiceChatClient -notmatch ('(?m)^' + [regex]::Escape($expectedSetting) + '\r?$')) {
+            Add-Failure "Voice chat contains a personal device/onboarding value instead of: $expectedSetting"
+        }
+    }
+}
+
+$quickSkinClientPath = Join-Path $packRootFullPath 'config\quickskin-client.json'
+if (Test-Path -LiteralPath $quickSkinClientPath -PathType Leaf) {
+    $quickSkinClient = Get-Content -LiteralPath $quickSkinClientPath -Raw
+    foreach ($property in @('activeSkinHash', 'activeCpmModelHash', 'activeCapeHash', 'playerOwnSkinHash')) {
+        if ($quickSkinClient -notmatch ('"' + [regex]::Escape($property) + '"\s*:\s*""')) {
+            Add-Failure "Quick Skin contains a personal value in $property."
+        }
+    }
+}
+
+$kubeJsWebServerPath = Join-Path $packRootFullPath 'kubejs\config\web_server.json'
+if (Test-Path -LiteralPath $kubeJsWebServerPath -PathType Leaf) {
+    $kubeJsWebServer = Get-Content -LiteralPath $kubeJsWebServerPath -Raw
+    if ($kubeJsWebServer -notmatch '"enabled"\s*:\s*false' -or $kubeJsWebServer -notmatch '"auth"\s*:\s*""') {
+        Add-Failure 'KubeJS web server must be disabled and contain no copied authentication secret.'
+    }
+}
+
+$textExtensions = @('.toml', '.json', '.json5', '.cfg', '.conf', '.properties', '.txt', '.js', '.md', '.yml', '.yaml', '.mcmeta')
+foreach ($file in $allFiles | Where-Object { $textExtensions -contains $_.Extension.ToLowerInvariant() }) {
+    try {
+        $content = Get-Content -LiteralPath $file.FullName -Raw
+        if ($content -match '(?i)([a-z]:\\users\\|e:\\prism\\prismlauncher)') {
+            Add-Failure "Absolute local path found in: $(Get-RelativePackPath $file.FullName)"
+        }
+    }
+    catch {
+        Add-Failure "Could not inspect text file: $(Get-RelativePackPath $file.FullName)"
+    }
+}
+
+$modsDirectory = Join-Path $packRootFullPath 'mods'
+$modMetadata = @(Get-ChildItem -LiteralPath $modsDirectory -Filter '*.pw.toml' -File)
+$rawModJars = @(Get-ChildItem -LiteralPath $modsDirectory -Filter '*.jar' -File)
+if ($rawModJars.Count -ne 1) { Add-Failure "Expected one redistributable raw mod JAR, found $($rawModJars.Count)." }
+if ($rawModJars.Count -eq 1 -and $rawModJars[0].Name -ne 'create_salvage-1.1.0+create6.0.10.jar') {
+    Add-Failure "Unexpected raw mod JAR: $($rawModJars[0].Name)"
+}
+if ($modMetadata.Count -lt 1) {
+    Add-Failure 'The pack contains no Modrinth mod metadata entries.'
+}
+$totalModCount = $modMetadata.Count + $rawModJars.Count
+
+foreach ($metadata in $modMetadata) {
+    $content = Get-Content -LiteralPath $metadata.FullName -Raw
+    if ($content -notmatch '(?m)^url = "https://cdn\.modrinth\.com/' -or
+        $content -notmatch '(?m)^hash-format = "sha512"$' -or
+        $content -notmatch '(?m)^hash = "[0-9a-f]{128}"$' -or
+        $content -notmatch '(?m)^mod-id = "[^"]+"$' -or
+        $content -notmatch '(?m)^version = "[^"]+"$') {
+        Add-Failure "Incomplete Modrinth metadata: $(Get-RelativePackPath $metadata.FullName)"
+    }
+}
+
+$resourcepackMetadata = @(Get-ChildItem -LiteralPath (Join-Path $packRootFullPath 'resourcepacks') -Filter '*.pw.toml' -File)
+if ($resourcepackMetadata.Count -ne 1) {
+    Add-Failure "Expected one Default Dark Mode metadata entry, found $($resourcepackMetadata.Count)."
+}
+elseif ((Get-Content -LiteralPath $resourcepackMetadata[0].FullName -Raw) -notmatch 'mod-id = "6SLU7tS5"') {
+    Add-Failure 'The resource pack is not pinned to Default Dark Mode on Modrinth.'
+}
+
+if (Test-Path -LiteralPath $packTomlPath -PathType Leaf) {
+    $packToml = Get-Content -LiteralPath $packTomlPath -Raw
+    foreach ($expected in @(
+        'version = "1.1.2-ely.1"',
+        'minecraft = "1.21.1"',
+        'neoforge = "21.1.229"',
+        'no-internal-hashes = true'
+    )) {
+        if (-not $packToml.Contains($expected)) { Add-Failure "pack.toml is missing: $expected" }
+    }
+}
+
+if ((Test-Path -LiteralPath $packTomlPath -PathType Leaf) -and (Test-Path -LiteralPath $indexPath -PathType Leaf)) {
+    $actualIndexHash = (Get-FileHash -LiteralPath $indexPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $packToml = Get-Content -LiteralPath $packTomlPath -Raw
+    $configuredHash = [regex]::Match($packToml, '(?ms)\[index\].*?hash\s*=\s*"([0-9a-f]{64})"').Groups[1].Value
+    if ($configuredHash -ne $actualIndexHash) {
+        Add-Failure "pack.toml index hash does not match index.toml ($configuredHash != $actualIndexHash)."
+    }
+
+    $indexContent = (Get-Content -LiteralPath $indexPath -Raw).Replace("`r`n", "`n")
+    foreach ($requiredPreservePath in @(
+        'options.txt',
+        'config/quickskin-client.json',
+        'config/voicechat/voicechat-client.properties'
+    )) {
+        $quotedPath = [regex]::Escape($requiredPreservePath)
+        $preservePattern = '(?ms)\[\[files\]\].*?file\s*=\s*"{0}"\s*\npreserve\s*=\s*true' -f $quotedPath
+        if ($indexContent -notmatch $preservePattern) {
+            Add-Failure "Expected preserve=true for $requiredPreservePath."
+        }
+    }
+}
+
+$optionsPath = Join-Path $packRootFullPath 'options.txt'
+if (-not (Test-Path -LiteralPath $optionsPath -PathType Leaf)) {
+    Add-Failure 'options.txt is missing.'
+}
+elseif ((Get-Content -LiteralPath $optionsPath -Raw) -notmatch '(?m)^lang:ru_ru\r?$') {
+    Add-Failure 'options.txt must start players with the Russian language selected.'
+}
+elseif ((Get-Content -LiteralPath $optionsPath -Raw) -match '(?m)^lastServer:') {
+    Add-Failure 'options.txt must not contain a remembered server address.'
+}
+
+foreach ($requiredDirectory in @('config', 'defaultconfigs', 'kubejs', 'global_packs')) {
+    if (-not (Test-Path -LiteralPath (Join-Path $packRootFullPath $requiredDirectory) -PathType Container)) {
+        Add-Failure "Required pack directory is missing: $requiredDirectory"
+    }
+}
+
+if ($failures.Count -gt 0) {
+    throw ("Pack validation failed:`n - " + ($failures -join "`n - "))
+}
+
+Write-Host "Pack validation passed: $totalModCount mods, Default Dark Mode, clean configuration and valid index hash."

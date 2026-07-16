@@ -1,0 +1,21 @@
+{
+    "components": [
+        {
+            "important": true,
+            "uid": "net.minecraft",
+            "version": "1.21.1"
+        },
+        {
+            "uid": "net.neoforged",
+            "version": "21.1.229"
+        },
+        {
+            "cachedName": "LWJGL 3",
+            "cachedVersion": "3.3.3",
+            "uid": "org.lwjgl3",
+            "version": "3.3.3"
+        }
+    ],
+    "formatVersion": 1
+}
+

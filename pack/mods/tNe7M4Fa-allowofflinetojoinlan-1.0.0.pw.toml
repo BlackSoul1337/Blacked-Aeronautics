@@ -1,0 +1,13 @@
+name = "Allow Offline Players to Join LAN"
+filename = "allowofflinetojoinlan-1.0.0.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/tNe7M4Fa/versions/CbaUUqoN/allowofflinetojoinlan-1.0.0.jar"
+hash-format = "sha512"
+hash = "d0270bcf6c212881f3df0539d09dd0eb21775788fc7e9ad62365d5cf3096f8c18d5d2f6b60c9dc6ee0b1449ab7f56a8abef590cde56f7e980724c025fc90505d"
+
+[update]
+[update.modrinth]
+mod-id = "tNe7M4Fa"
+version = "CbaUUqoN"

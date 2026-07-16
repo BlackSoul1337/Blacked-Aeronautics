@@ -1,0 +1,16 @@
+# Local build inputs (copied into dist by scripts/build-portable.ps1)
+/elyprism/
+/jdk-21.0.11+10/
+/packwiz-installer-bootstrap.jar
+/prismlauncher_r0ymcRQUyB.png
+
+# Local tools and generated output
+/.tools/
+/dist/
+/.agents/
+/devs/
+
+# IDE / OS noise
+.DS_Store
+Thumbs.db
+*.user

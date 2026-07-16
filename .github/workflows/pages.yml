@@ -1,0 +1,65 @@
+name: Build and deploy packwiz
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "pack/**"
+      - "pages/**"
+      - "scripts/refresh-pack.ps1"
+      - "scripts/validate-pack.ps1"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Download pinned packwiz build
+        shell: bash
+        run: |
+          curl --fail --location --retry 3 \
+            https://nightly.link/packwiz/packwiz/actions/artifacts/8109649028.zip \
+            --output packwiz-linux-x64.zip
+          echo "b8c620515a22337e6f903f6e10cef6c5f01b7019c43adc6e14658927fe518d1e  packwiz-linux-x64.zip" | sha256sum --check --strict
+          unzip -q packwiz-linux-x64.zip -d .packwiz-bin
+          chmod +x .packwiz-bin/packwiz
+
+      - name: Refresh and validate pack
+        shell: pwsh
+        run: ./scripts/refresh-pack.ps1 -PackwizPath "$env:GITHUB_WORKSPACE/.packwiz-bin/packwiz"
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Prepare Pages artifact
+        shell: bash
+        run: |
+          mkdir .pages-site
+          cp -a pack/. .pages-site/
+          cp pages/index.html .pages-site/index.html
+
+      - name: Upload pack artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: .pages-site
+
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

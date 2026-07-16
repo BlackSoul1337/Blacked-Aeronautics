@@ -1,0 +1,13 @@
+name = "kubejsdelight-1.1.4"
+filename = "kubejsdelight-1.1.4.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/apt5xJoR/versions/oDapYBnk/kubejsdelight-1.1.4.jar"
+hash-format = "sha512"
+hash = "9978ef1e10a56f3c96d2f1ae46a14565f0cbc7aa89f83eb2f9eb4e955bed9dcece84be0cef1c2b2cab51f59a3aad5f1022339437385e625f66f9e846503310be"
+
+[update]
+[update.modrinth]
+mod-id = "apt5xJoR"
+version = "oDapYBnk"

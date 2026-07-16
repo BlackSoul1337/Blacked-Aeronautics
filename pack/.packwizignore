@@ -1,0 +1,13 @@
+# Packwiz control files
+.packwizignore
+.nojekyll
+
+# Local/editor noise must never be published
+.git/
+.github/
+*.bak
+*.tmp
+*.log
+Thumbs.db
+.DS_Store
+
