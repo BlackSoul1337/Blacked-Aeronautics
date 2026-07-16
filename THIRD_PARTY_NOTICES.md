@@ -1,13 +1,13 @@
-# Third-party notices
+# Авторы и лицензии
 
-Blacked Aeronautics объединяет и настраивает независимые проекты. Торговые марки принадлежат их владельцам.
+Blacked Aeronautics использует работу других авторов. Спасибо им за проекты, на которых основана эта сборка.
 
-- **Aeronautics - Create Customised**, автор AdoLovesChicken — исходная MIT-сборка: <https://modrinth.com/modpack/create-customised>.
-- **Create: Salvage 1.1.0**, автор EliteMasterEric — MIT; исходный код: <https://github.com/EliteMasterEric/Create-Salvage>. Его проверенный JAR распространяется внутри packwiz-пака согласно лицензии, указанной в метаданных мода.
-- **PineconeMC 11.0.3** (бывший ElyPrismLauncher) — GPL-3.0-only; исходники и тексты лицензий: <https://github.com/ElyPrismLauncher/Launcher/releases/tag/11.0.3>. PineconeMC основан на Prism Launcher и MultiMC. Эта portable-упаковка не изменяет бинарники лаунчера. Логотипы и связанные ресурсы PineconeMC/Prism распространяются под CC BY-SA 4.0.
-- **Eclipse Temurin JDK 21.0.11+10-LTS**, Eclipse Adoptium — OpenJDK под GPL-2.0 with Classpath Exception и сопутствующими лицензиями. Полные уведомления поставляются внутри `java/NOTICE` и `java/legal/`; исходники: <https://adoptium.net/temurin/releases/?version=21>.
-- **packwiz-installer-bootstrap 0.0.3** — MIT; исходники: <https://github.com/packwiz/packwiz-installer-bootstrap>.
-- Моды и Default Dark Mode, описанные файлами `.pw.toml`, не перераспространяются этим репозиторием: клиент скачивает точные версии с официального CDN Modrinth. Авторство и лицензия каждого проекта доступны по его `mod-id` в соответствующем `.pw.toml`.
-- Minecraft и NeoForge не входят в Release и загружаются лаунчером из официальных источников при первом запуске.
+- Основа сборки — [Aeronautics - Create Customised](https://modrinth.com/modpack/create-customised) от AdoLovesChicken, лицензия MIT.
+- Create: Salvage 1.1.0 создан EliteMasterEric и распространяется по лицензии MIT. [Исходный код](https://github.com/EliteMasterEric/Create-Salvage).
+- Лаунчер PineconeMC 11.0.3 распространяется по GPL-3.0. Он основан на Prism Launcher и MultiMC; логотипы этих проектов распространяются по CC BY-SA 4.0. [Исходный проект и лицензии](https://github.com/ElyPrismLauncher/Launcher/releases/tag/11.0.3).
+- В комплект входит Eclipse Temurin JDK 21 от Eclipse Adoptium, лицензия GPL-2.0 with Classpath Exception. Полные тексты лицензий находятся в папке `java/legal`. [Страница проекта](https://adoptium.net/temurin/releases/?version=21).
+- Помощник обновления packwiz-installer-bootstrap 0.0.3 распространяется по лицензии MIT. [Исходный код](https://github.com/packwiz/packwiz-installer-bootstrap).
 
-Исходники скриптов этой адаптации и packwiz-манифест находятся в <https://github.com/BlackSoul1337/Blacked-Aeronautics>.
+Остальные моды скачиваются с Modrinth. Их авторы и условия использования указаны на страницах соответствующих проектов. Minecraft и NeoForge загружаются лаунчером отдельно.
+
+[Исходный код Blacked Aeronautics](https://github.com/BlackSoul1337/Blacked-Aeronautics).

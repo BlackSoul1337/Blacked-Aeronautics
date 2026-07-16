@@ -40,6 +40,31 @@ foreach ($source in @($launcherPath, $javaPath, $templatePath)) {
         throw "Required build source is missing: $source"
     }
 }
+
+$forbiddenLauncherSourceEntries = @(
+    'accounts.json',
+    'accounts.json.bak',
+    'elyprismlauncher.cfg',
+    'prismlauncher.cfg',
+    'instances',
+    'logs',
+    'crash-reports',
+    'cache',
+    'metacache'
+)
+foreach ($entry in $forbiddenLauncherSourceEntries) {
+    $candidate = Join-Path $launcherPath $entry
+    if (Test-Path -LiteralPath $candidate) {
+        throw "Launcher source contains local user data: $candidate"
+    }
+}
+$launcherLog = Get-ChildItem -LiteralPath $launcherPath -Recurse -File -Force | Where-Object {
+    $_.Extension -in @('.log', '.lck')
+} | Select-Object -First 1
+if ($launcherLog) {
+    throw "Launcher source contains a local log or lock file: $($launcherLog.FullName)"
+}
+
 Assert-ChildPath $outputRootPath $repoRoot
 [System.IO.Directory]::CreateDirectory($outputRootPath) | Out-Null
 
@@ -73,6 +98,14 @@ foreach ($requiredFile in @($launcherExe, $javaExe, $javawExe, $bootstrapJar, $p
     if (-not (Test-Path -LiteralPath $requiredFile -PathType Leaf)) {
         throw "Portable build is missing: $requiredFile"
     }
+}
+
+$forbiddenPortableFiles = @('accounts.json', 'accounts.json.bak', 'servers.dat', 'usercache.json')
+$personalFile = Get-ChildItem -LiteralPath $portableDirectory -Recurse -File -Force | Where-Object {
+    $_.Name.ToLowerInvariant() -in $forbiddenPortableFiles
+} | Select-Object -First 1
+if ($personalFile) {
+    throw "Portable build contains personal data: $($personalFile.FullName)"
 }
 
 $launcherVersion = (Get-Item -LiteralPath $launcherExe).VersionInfo.ProductVersion

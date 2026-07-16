@@ -6,8 +6,9 @@
   <title>Blacked Aeronautics</title>
   <style>
     :root { color-scheme: dark; font-family: system-ui, sans-serif; }
-    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #0d1117; color: #e6edf3; }
-    main { width: min(720px, calc(100% - 48px)); margin: 24px; padding: 48px; border: 1px solid #30363d; border-radius: 16px; background: #161b22; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; padding: 24px; display: grid; place-items: center; background: #0d1117; color: #e6edf3; }
+    main { width: min(720px, 100%); padding: 48px; border: 1px solid #30363d; border-radius: 16px; background: #161b22; }
     h1 { margin-top: 0; }
     h2 { margin-top: 32px; }
     p, li { line-height: 1.6; color: #b1bac4; }
@@ -15,28 +16,28 @@
     .buttons { display: flex; flex-wrap: wrap; gap: 12px; margin: 24px 0; }
     .button { display: inline-block; padding: 11px 16px; border-radius: 8px; background: #238636; color: white; font-weight: 600; text-decoration: none; }
     .button.secondary { background: #30363d; }
+    @media (max-width: 560px) { body { padding: 12px; } main { padding: 28px 22px; } }
   </style>
 </head>
 <body>
   <main>
     <h1>Blacked Aeronautics</h1>
-    <p>Готовая сборка Minecraft. Моды и настройки автоматически проверяются перед каждым запуском игры.</p>
+    <p>Готовый лаунчер Minecraft. Скачайте, войдите в аккаунт и нажмите «Играть».</p>
 
     <div class="buttons">
-      <a class="button" href="https://github.com/BlackSoul1337/Blacked-Aeronautics/releases/download/v1.1.2-ely.1/Blacked-Aeronautics-1.1.2-ely.1-win-x64-setup.exe">Скачать Setup</a>
-      <a class="button secondary" href="https://github.com/BlackSoul1337/Blacked-Aeronautics/releases/download/v1.1.2-ely.1/Blacked-Aeronautics-1.1.2-ely.1-win-x64-portable.zip">Скачать Portable</a>
+      <a class="button" href="https://github.com/BlackSoul1337/Blacked-Aeronautics/releases/download/v1.1.2-ely.1/Blacked-Aeronautics-1.1.2-ely.1-win-x64-setup.exe">Скачать установщик</a>
+      <a class="button secondary" href="https://github.com/BlackSoul1337/Blacked-Aeronautics/releases/download/v1.1.2-ely.1/Blacked-Aeronautics-1.1.2-ely.1-win-x64-portable.zip">Скачать без установки</a>
     </div>
 
-    <h2>Как установить</h2>
+    <h2>Как начать играть</h2>
     <ol>
-      <li>Скачайте Setup и запустите файл. Лаунчер установится без прав администратора и появится в меню «Пуск».</li>
-      <li>Откройте Blacked Aeronautics, добавьте аккаунт Microsoft/Ely.by или создайте профиль со своим ником.</li>
-      <li>Выберите сборку Blacked Aeronautics и нажмите «Играть». Первый запуск займёт больше времени, потому что загрузит игру и моды.</li>
+      <li>Скачайте и откройте лаунчер.</li>
+      <li>Войдите через Microsoft или Ely.by. Можно также просто указать свой ник.</li>
+      <li>Выберите Blacked Aeronautics и нажмите «Играть».</li>
     </ol>
 
-    <p>Java 21 уже включена. Устанавливать Java отдельно и выбирать её вручную не требуется.</p>
-    <p>Portable подходит тем, кто не хочет устанавливать программу: распакуйте готовую папку и перенесите её в удобное место.</p>
-    <p><a href="pack.toml">Технический файл pack.toml</a></p>
+    <p>Первый запуск может занять некоторое время: игра и моды скачаются автоматически. Потом лаунчер будет сам проверять обновления.</p>
+    <p>Устанавливать дополнительные программы не нужно. Если выбрали версию без установки, просто распакуйте ZIP в удобное место.</p>
   </main>
 </body>
 </html>

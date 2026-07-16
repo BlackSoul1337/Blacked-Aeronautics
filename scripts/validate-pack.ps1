@@ -91,6 +91,13 @@ if ($rawModJars.Count -ne 1) { Add-Failure "Expected one redistributable raw mod
 if ($rawModJars.Count -eq 1 -and $rawModJars[0].Name -ne 'create_salvage-1.1.0+create6.0.10.jar') {
     Add-Failure "Unexpected raw mod JAR: $($rawModJars[0].Name)"
 }
+if ($rawModJars.Count -eq 1 -and $rawModJars[0].Name -eq 'create_salvage-1.1.0+create6.0.10.jar') {
+    $expectedRawJarHash = 'fda9138c05586a6ee50dbea4b91f509e3a8051bdaf059ed2f227019e50b7462b4b8b2aab08a2e759e6b834061febe145dd2273c128cae9f01ac54f8fdc519093'
+    $actualRawJarHash = (Get-FileHash -LiteralPath $rawModJars[0].FullName -Algorithm SHA512).Hash.ToLowerInvariant()
+    if ($actualRawJarHash -ne $expectedRawJarHash) {
+        Add-Failure 'The redistributable Create: Salvage JAR does not match the reviewed file.'
+    }
+}
 if ($modMetadata.Count -lt 1) {
     Add-Failure 'The pack contains no Modrinth mod metadata entries.'
 }
