@@ -87,15 +87,8 @@ if (Test-Path -LiteralPath $kubeJsWebServerPath -PathType Leaf) {
 }
 
 $atlasCreativeBypassPath = Join-Path $packRootFullPath 'kubejs\client_scripts\atlasCreativeBypass.js'
-if (-not (Test-Path -LiteralPath $atlasCreativeBypassPath -PathType Leaf)) {
-    Add-Failure 'The Antique Atlas creative key handler is missing.'
-}
-else {
-    $atlasCreativeBypass = Get-Content -LiteralPath $atlasCreativeBypassPath -Raw
-    if ($atlasCreativeBypass -match 'event\.minecraft' -or
-        $atlasCreativeBypass -notmatch 'event\.client\.player') {
-        Add-Failure 'The Antique Atlas creative key handler uses an invalid KubeJS client reference.'
-    }
+if (Test-Path -LiteralPath $atlasCreativeBypassPath -PathType Leaf) {
+    Add-Failure 'The obsolete Antique Atlas creative key handler must stay excluded.'
 }
 
 $textExtensions = @('.toml', '.json', '.json5', '.cfg', '.conf', '.properties', '.txt', '.js', '.md', '.yml', '.yaml', '.mcmeta')

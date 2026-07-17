@@ -1582,10 +1582,6 @@ file = "kubejs/assets/kubejs/textures/item/example_item.png"
 hash = "45a5f56eba6066ad05c70988a32b72c50cfeb6e35857739bd582007011ea002b"
 
 [[files]]
-file = "kubejs/client_scripts/atlasCreativeBypass.js"
-hash = "b42eb671ea3dcbe334ab42bd8fed1cad5ee12e3c18b6ce8d7b6fd18c6dade5d8"
-
-[[files]]
 file = "kubejs/client_scripts/easyStructuresLangFix.js"
 hash = "c9a7aea764e740551b8bc0cf4e3f61b94c1018e6fbf59c4506679da63c4222a5"
 

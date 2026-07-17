@@ -89,14 +89,6 @@ if (-not (Test-Path -LiteralPath $sourceMinecraft -PathType Container)) {
 Assert-ChildPath $destinationPackPath $repoRoot
 [System.IO.Directory]::CreateDirectory($destinationPackPath) | Out-Null
 
-$preservedPackFiles = @{}
-foreach ($relativePath in @('kubejs/client_scripts/atlasCreativeBypass.js')) {
-    $existingPath = Join-Path $destinationPackPath $relativePath
-    if (Test-Path -LiteralPath $existingPath -PathType Leaf) {
-        $preservedPackFiles[$relativePath] = Get-Content -LiteralPath $existingPath -Raw
-    }
-}
-
 $generatedEntries = @('config', 'defaultconfigs', 'kubejs', 'global_packs', 'mods', 'resourcepacks', 'options.txt')
 foreach ($entry in $generatedEntries) {
     $target = Join-Path $destinationPackPath $entry
@@ -107,6 +99,7 @@ foreach ($entry in $generatedEntries) {
 }
 
 $excludedExactPaths = @(
+    'kubejs/client_scripts/atlasCreativeBypass.js',
     'config/voicechat/username-cache.json',
     'config/voicechat/player-volumes.properties',
     'config/quickskin_preferences.json',
@@ -144,10 +137,6 @@ foreach ($directoryName in @('config', 'defaultconfigs', 'kubejs', 'global_packs
             Copy-Item -LiteralPath $_.FullName -Destination $targetPath -Force
         }
     }
-}
-
-foreach ($relativePath in $preservedPackFiles.Keys) {
-    Write-Utf8NoBom (Join-Path $destinationPackPath $relativePath) $preservedPackFiles[$relativePath]
 }
 
 $voiceChatClientPath = Join-Path $destinationPackPath 'config\voicechat\voicechat-client.properties'
