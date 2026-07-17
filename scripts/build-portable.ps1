@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$Version = '1.1.4-ely.1',
+    [string]$Version = '1.1.5-ely.1',
     [string]$LauncherSource = (Join-Path $PSScriptRoot '..\elyprism'),
     [string]$JavaSource = (Join-Path $PSScriptRoot '..\jdk-21.0.11+10'),
     [string]$TemplateSource = (Join-Path $PSScriptRoot '..\launcher-template'),
@@ -101,6 +101,7 @@ $updateConfig = [ordered]@{
     repository = 'BlackSoul1337/Blacked-Aeronautics'
     launcher = 'elyprismlauncher.exe'
     packUrl = 'https://blacksoul1337.github.io/Blacked-Aeronautics/pack.toml'
+    packMirrorUrl = 'https://cdn.jsdelivr.net/gh/BlackSoul1337/Blacked-Aeronautics@main/pack/pack.toml'
 } | ConvertTo-Json
 [System.IO.File]::WriteAllText(
     (Join-Path $portableDirectory 'blacked-update.json'),
@@ -111,13 +112,26 @@ $updateConfig = [ordered]@{
 $launcherExe = Join-Path $portableDirectory 'elyprismlauncher.exe'
 $javaExe = Join-Path $portableDirectory 'java\bin\java.exe'
 $javawExe = Join-Path $portableDirectory 'java\bin\javaw.exe'
+$installerJar = Join-Path $portableDirectory 'instances\Blacked-Aeronautics\minecraft\packwiz-installer.jar'
 $bootstrapJar = Join-Path $portableDirectory 'instances\Blacked-Aeronautics\minecraft\packwiz-installer-bootstrap.jar'
+$packwizUpdateScript = Join-Path $portableDirectory 'instances\Blacked-Aeronautics\minecraft\packwiz-update.ps1'
 $portableMarker = Join-Path $portableDirectory 'portable.txt'
 
-foreach ($requiredFile in @($wrapperExe, $launcherExe, $javaExe, $javawExe, $bootstrapJar, $portableMarker)) {
+foreach ($requiredFile in @($wrapperExe, $launcherExe, $javaExe, $javawExe, $installerJar, $bootstrapJar, $packwizUpdateScript, $portableMarker)) {
     if (-not (Test-Path -LiteralPath $requiredFile -PathType Leaf)) {
         throw "Portable build is missing: $requiredFile"
     }
+}
+
+$expectedInstallerHash = 'c9f646908d340d84773948a9a7d98bc1dae250d35e1016dc6e2b8459760b5598'
+$actualInstallerHash = (Get-FileHash -LiteralPath $installerJar -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($actualInstallerHash -ne $expectedInstallerHash) {
+    throw "Unexpected packwiz-installer SHA-256: $actualInstallerHash"
+}
+$expectedBootstrapHash = 'a8fbb24dc604278e97f4688e82d3d91a318b98efc08d5dbfcbcbcab6443d116c'
+$actualBootstrapHash = (Get-FileHash -LiteralPath $bootstrapJar -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($actualBootstrapHash -ne $expectedBootstrapHash) {
+    throw "Unexpected packwiz-installer-bootstrap SHA-256: $actualBootstrapHash"
 }
 
 $forbiddenPortableFiles = @('accounts.json', 'accounts.json.bak', 'servers.dat', 'usercache.json')

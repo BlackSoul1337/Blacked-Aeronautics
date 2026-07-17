@@ -31,6 +31,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Download pinned packwiz build
         shell: bash
@@ -64,3 +66,21 @@ jobs:
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Refresh changed files on the jsDelivr mirror
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          if git cat-file -e "${BEFORE_SHA}^{commit}" 2>/dev/null; then
+            mapfile -t changed < <(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA" -- pack)
+          else
+            mapfile -t changed < <(git ls-files pack)
+          fi
+          changed+=("pack/pack.toml" "pack/index.toml")
+          printf '%s\n' "${changed[@]}" | sort -u | while IFS= read -r path; do
+            encoded_path=$(python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1]))' "$path")
+            curl --fail --silent --show-error --retry 3 \
+              "https://purge.jsdelivr.net/gh/BlackSoul1337/Blacked-Aeronautics@main/$encoded_path" \
+              >/dev/null
+          done

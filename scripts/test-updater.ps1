@@ -92,6 +92,7 @@ try {
     $quote = $program.GetMethod('Quote', [System.Reflection.BindingFlags]'Static, NonPublic')
     $extractNeoForge = $program.GetMethod('ExtractNeoForgeVersion', [System.Reflection.BindingFlags]'Static, NonPublic')
     $updateNeoForge = $program.GetMethod('UpdateNeoForgeManifest', [System.Reflection.BindingFlags]'Static, NonPublic')
+    $migratePackwiz = $program.GetMethod('TryMigratePackwizCommand', [System.Reflection.BindingFlags]'Static, NonPublic')
     if ($compare.Invoke($null, @('1.1.3-ely.2', '1.1.3-ely.1')) -le 0) {
         throw 'Updater version comparison test failed.'
     }
@@ -134,6 +135,94 @@ neoforge = "21.1.238"
     }
     if ($updateNeoForge.Invoke($null, $manifestArguments)) {
         throw 'Updater NeoForge manifest test reports a change for the current version.'
+    }
+
+    $migrationRoot = Join-Path $testRoot 'migration'
+    $migrationInstance = Join-Path $migrationRoot 'instances\Blacked-Aeronautics'
+    [System.IO.Directory]::CreateDirectory($migrationInstance) | Out-Null
+    $migrationConfig = Join-Path $migrationInstance 'instance.cfg'
+    $legacyCommand = 'PreLaunchCommand="\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar https://blacksoul1337.github.io/Blacked-Aeronautics/pack.toml"'
+    [System.IO.File]::WriteAllText($migrationConfig, "[General]`n$legacyCommand`nMaxMemAlloc=6144`n")
+    $migrationArguments = New-Object 'System.Object[]' 1
+    $migrationArguments[0] = $migrationRoot.PSObject.BaseObject
+    if (-not $migratePackwiz.Invoke($null, $migrationArguments)) {
+        throw 'Updater packwiz command migration did not report a change.'
+    }
+    $migratedConfig = Get-Content -LiteralPath $migrationConfig -Raw
+    if ($migratedConfig -notmatch 'packwiz-update\.ps1' -or
+        $migratedConfig -match 'packwiz-installer-bootstrap' -or
+        $migratedConfig -notmatch 'MaxMemAlloc=6144') {
+        throw 'Updater packwiz command migration failed.'
+    }
+
+    $fakeJava = Join-Path $testRoot 'fake-java.exe'
+    $fakeJavaSource = Join-Path $testRoot 'fake-java.cs'
+    $fakeInstaller = Join-Path $testRoot 'packwiz-installer.jar'
+    $fakeLog = Join-Path $testRoot 'packwiz-fallback.log'
+    $fakeState = Join-Path $testRoot 'packwiz-fallback.state'
+    [System.IO.File]::WriteAllText($fakeInstaller, 'test')
+    [System.IO.File]::WriteAllText($fakeJavaSource, @'
+using System;
+using System.IO;
+
+internal static class FakeJava
+{
+    private static int Main(string[] args)
+    {
+        string log = Environment.GetEnvironmentVariable("FAKE_JAVA_LOG");
+        string state = Environment.GetEnvironmentVariable("FAKE_JAVA_STATE");
+        File.AppendAllText(log, string.Join(" ", args) + Environment.NewLine);
+        if (File.Exists(state))
+            return 0;
+        File.WriteAllText(state, "failed once");
+        return 23;
+    }
+}
+'@)
+    $compiler = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
+    & $compiler '/nologo' '/target:exe' '/platform:x64' "/out:$fakeJava" $fakeJavaSource
+    if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $fakeJava -PathType Leaf)) {
+        throw "Fake Java compilation failed with exit code $LASTEXITCODE."
+    }
+    $packwizScript = Join-Path $repoRoot 'launcher-template\instances\Blacked-Aeronautics\minecraft\packwiz-update.ps1'
+    $childCommand = "& '$($packwizScript.Replace("'", "''"))' -JavaPath '$($fakeJava.Replace("'", "''"))' " +
+        "-InstallerPath '$($fakeInstaller.Replace("'", "''"))' " +
+        "-PackUrls @('https://primary.invalid/pack.toml','https://mirror.invalid/pack.toml')"
+    $encodedCommand = [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($childCommand))
+    $previousFakeLog = $env:FAKE_JAVA_LOG
+    $previousFakeState = $env:FAKE_JAVA_STATE
+    $previousErrorAction = $ErrorActionPreference
+    try {
+        $env:FAKE_JAVA_LOG = $fakeLog
+        $env:FAKE_JAVA_STATE = $fakeState
+        $ErrorActionPreference = 'Continue'
+        $fallbackOutput = @(& powershell.exe @(
+            '-NoProfile',
+            '-NonInteractive',
+            '-ExecutionPolicy',
+            'Bypass',
+            '-EncodedCommand',
+            $encodedCommand
+        ) 2>&1)
+        $fallbackExitCode = $LASTEXITCODE
+    }
+    finally {
+        $env:FAKE_JAVA_LOG = $previousFakeLog
+        $env:FAKE_JAVA_STATE = $previousFakeState
+        $ErrorActionPreference = $previousErrorAction
+    }
+    if ($fallbackExitCode -ne 0) {
+        $fallbackOutput | Write-Host
+        Get-Content -LiteralPath $fakeLog -ErrorAction SilentlyContinue | Write-Host
+        Write-Host "Fake state exists: $(Test-Path -LiteralPath $fakeState)"
+        throw "Packwiz fallback test failed with exit code $fallbackExitCode."
+    }
+    $fallbackLog = @(Get-Content -LiteralPath $fakeLog)
+    if ($fallbackLog.Count -ne 2 -or
+        $fallbackLog[0] -notmatch 'primary\.invalid' -or
+        $fallbackLog[1] -notmatch 'mirror\.invalid' -or
+        $fallbackLog[1] -notmatch 'java\.net\.useSystemProxies=true') {
+        throw 'Packwiz fallback did not try the primary source and mirror in order.'
     }
 
     Write-Host 'Updater tests passed.'

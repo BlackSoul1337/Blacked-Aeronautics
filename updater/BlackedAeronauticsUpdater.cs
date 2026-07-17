@@ -30,6 +30,7 @@ namespace BlackedAeronauticsUpdater
         public string repository { get; set; }
         public string launcher { get; set; }
         public string packUrl { get; set; }
+        public string packMirrorUrl { get; set; }
     }
 
     internal sealed class ReleaseInfo
@@ -208,7 +209,8 @@ namespace BlackedAeronauticsUpdater
             string configPath = Path.Combine(root, ConfigName);
             UpdateConfig config = ReadJson<UpdateConfig>(configPath);
             ValidateConfig(config);
-            TrySyncLoaderVersion(root, config.packUrl);
+            TryMigratePackwizCommand(root);
+            TrySyncLoaderVersion(root, config.packUrl, config.packMirrorUrl);
 
             List<string> forwarded = new List<string>(args);
             bool skipOnce = forwarded.Remove("--skip-update-once");
@@ -317,32 +319,83 @@ namespace BlackedAeronauticsUpdater
             }
         }
 
-        private static void TrySyncLoaderVersion(string root, string packUrl)
+        private static void TrySyncLoaderVersion(string root, params string[] packUrls)
+        {
+            foreach (string packUrl in packUrls)
+            {
+                try
+                {
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(packUrl);
+                    request.Method = "GET";
+                    request.UserAgent = UserAgent("loader-sync");
+                    request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                    request.Timeout = 10000;
+                    request.ReadWriteTimeout = 10000;
+
+                    string packToml;
+                    using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                    using (Stream stream = response.GetResponseStream())
+                    using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
+                        packToml = reader.ReadToEnd();
+
+                    string neoForgeVersion = ExtractNeoForgeVersion(packToml);
+                    string manifestPath = SafePath(
+                        root,
+                        "instances/Blacked-Aeronautics/mmc-pack.json");
+                    UpdateNeoForgeManifest(manifestPath, neoForgeVersion);
+                    return;
+                }
+                catch
+                {
+                    // Try the next source. A loader check must never block the launcher.
+                }
+            }
+        }
+
+        private static bool TryMigratePackwizCommand(string root)
         {
             try
             {
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(packUrl);
-                request.Method = "GET";
-                request.UserAgent = UserAgent("loader-sync");
-                request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-                request.Timeout = 10000;
-                request.ReadWriteTimeout = 10000;
-
-                string packToml;
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                using (Stream stream = response.GetResponseStream())
-                using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
-                    packToml = reader.ReadToEnd();
-
-                string neoForgeVersion = ExtractNeoForgeVersion(packToml);
-                string manifestPath = SafePath(
+                string instanceConfig = SafePath(
                     root,
-                    "instances/Blacked-Aeronautics/mmc-pack.json");
-                UpdateNeoForgeManifest(manifestPath, neoForgeVersion);
+                    "instances/Blacked-Aeronautics/instance.cfg");
+                if (!File.Exists(instanceConfig))
+                    return false;
+
+                const string legacyCommand =
+                    "PreLaunchCommand=\"\\\"$INST_JAVA\\\" -jar packwiz-installer-bootstrap.jar " +
+                    "https://blacksoul1337.github.io/Blacked-Aeronautics/pack.toml\"";
+                const string mirroredCommand =
+                    "PreLaunchCommand=\"powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass " +
+                    "-File packwiz-update.ps1 -JavaPath \\\"$INST_JAVA\\\"\"";
+
+                string content = File.ReadAllText(instanceConfig, Encoding.UTF8);
+                if (content.IndexOf(legacyCommand, StringComparison.Ordinal) < 0)
+                    return false;
+
+                string temporary = instanceConfig + ".update-" + Guid.NewGuid().ToString("N");
+                try
+                {
+                    File.WriteAllText(
+                        temporary,
+                        content.Replace(legacyCommand, mirroredCommand),
+                        new UTF8Encoding(false));
+                    File.Copy(temporary, instanceConfig, true);
+                }
+                finally
+                {
+                    try
+                    {
+                        if (File.Exists(temporary))
+                            File.Delete(temporary);
+                    }
+                    catch { }
+                }
+                return true;
             }
             catch
             {
-                // A loader check must never prevent the already installed launcher from opening.
+                return false;
             }
         }
 
@@ -738,15 +791,21 @@ namespace BlackedAeronauticsUpdater
         {
             if (config == null || string.IsNullOrWhiteSpace(config.version) ||
                 string.IsNullOrWhiteSpace(config.repository) || string.IsNullOrWhiteSpace(config.launcher) ||
-                string.IsNullOrWhiteSpace(config.packUrl) ||
+                string.IsNullOrWhiteSpace(config.packUrl) || string.IsNullOrWhiteSpace(config.packMirrorUrl) ||
                 !Regex.IsMatch(config.repository, "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$", RegexOptions.CultureInvariant))
                 throw new InvalidDataException("Настройки обновления повреждены.");
-            Uri parsedPackUrl;
-            if (!Uri.TryCreate(config.packUrl, UriKind.Absolute, out parsedPackUrl) ||
-                parsedPackUrl.Scheme != Uri.UriSchemeHttps ||
-                !string.Equals(parsedPackUrl.Host, "blacksoul1337.github.io", StringComparison.OrdinalIgnoreCase))
-                throw new InvalidDataException("Адрес обновления сборки повреждён.");
+            ValidatePackUrl(config.packUrl, "blacksoul1337.github.io");
+            ValidatePackUrl(config.packMirrorUrl, "cdn.jsdelivr.net");
             SafePath(AppDomain.CurrentDomain.BaseDirectory, config.launcher);
+        }
+
+        private static void ValidatePackUrl(string value, string expectedHost)
+        {
+            Uri parsed;
+            if (!Uri.TryCreate(value, UriKind.Absolute, out parsed) ||
+                parsed.Scheme != Uri.UriSchemeHttps ||
+                !string.Equals(parsed.Host, expectedHost, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidDataException("Адрес обновления сборки повреждён.");
         }
 
         private static int CompareVersions(string left, string right)
