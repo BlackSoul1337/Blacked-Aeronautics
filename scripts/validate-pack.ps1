@@ -86,6 +86,18 @@ if (Test-Path -LiteralPath $kubeJsWebServerPath -PathType Leaf) {
     }
 }
 
+$atlasCreativeBypassPath = Join-Path $packRootFullPath 'kubejs\client_scripts\atlasCreativeBypass.js'
+if (-not (Test-Path -LiteralPath $atlasCreativeBypassPath -PathType Leaf)) {
+    Add-Failure 'The Antique Atlas creative key handler is missing.'
+}
+else {
+    $atlasCreativeBypass = Get-Content -LiteralPath $atlasCreativeBypassPath -Raw
+    if ($atlasCreativeBypass -match 'event\.minecraft' -or
+        $atlasCreativeBypass -notmatch 'event\.client\.player') {
+        Add-Failure 'The Antique Atlas creative key handler uses an invalid KubeJS client reference.'
+    }
+}
+
 $textExtensions = @('.toml', '.json', '.json5', '.cfg', '.conf', '.properties', '.txt', '.js', '.md', '.yml', '.yaml', '.mcmeta')
 foreach ($file in $allFiles | Where-Object { $textExtensions -contains $_.Extension.ToLowerInvariant() }) {
     try {
@@ -115,6 +127,44 @@ foreach ($rawModJar in $rawModJars) {
     $actualRawJarHash = (Get-FileHash -LiteralPath $rawModJar.FullName -Algorithm SHA512).Hash.ToLowerInvariant()
     if ($actualRawJarHash -ne $approvedRawMods[$rawModJar.Name]) {
         Add-Failure "The approved raw mod JAR does not match the reviewed file: $($rawModJar.Name)"
+    }
+}
+
+$mirrorAssetsPath = Join-Path $packRootFullPath 'mirror-assets'
+$mirrorManifestPath = Join-Path $mirrorAssetsPath 'manifest.json'
+if (-not (Test-Path -LiteralPath $mirrorManifestPath -PathType Leaf)) {
+    Add-Failure 'The raw JAR mirror manifest is missing.'
+}
+else {
+    try {
+        $mirrorManifest = Get-Content -LiteralPath $mirrorManifestPath -Raw | ConvertFrom-Json
+        $mirrorAssets = @($mirrorManifest.assets)
+        if ($mirrorManifest.format -ne 1 -or $mirrorAssets.Count -ne $rawModJars.Count) {
+            Add-Failure 'The raw JAR mirror manifest does not match the approved JAR count.'
+        }
+        foreach ($asset in $mirrorAssets) {
+            $rawJar = $rawModJars | Where-Object { $_.Name -eq [string]$asset.name } | Select-Object -First 1
+            $encodedPath = Join-Path $mirrorAssetsPath ([string]$asset.source)
+            if ($null -eq $rawJar -or -not (Test-Path -LiteralPath $encodedPath -PathType Leaf)) {
+                Add-Failure "The raw JAR mirror entry is incomplete: $($asset.name)"
+                continue
+            }
+            $decoded = [Convert]::FromBase64String((Get-Content -LiteralPath $encodedPath -Raw).Trim())
+            $sha256 = [System.Security.Cryptography.SHA256]::Create()
+            try {
+                $decodedHash = ([BitConverter]::ToString($sha256.ComputeHash($decoded))).Replace('-', '').ToLowerInvariant()
+            }
+            finally {
+                $sha256.Dispose()
+            }
+            $rawHash = (Get-FileHash -LiteralPath $rawJar.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($decodedHash -ne $rawHash -or $decodedHash -ne ([string]$asset.sha256).ToLowerInvariant()) {
+                Add-Failure "The raw JAR mirror checksum does not match: $($asset.name)"
+            }
+        }
+    }
+    catch {
+        Add-Failure "The raw JAR mirror manifest is invalid: $($_.Exception.Message)"
     }
 }
 if ($modMetadata.Count -lt 1) {

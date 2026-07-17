@@ -1583,7 +1583,7 @@ hash = "45a5f56eba6066ad05c70988a32b72c50cfeb6e35857739bd582007011ea002b"
 
 [[files]]
 file = "kubejs/client_scripts/atlasCreativeBypass.js"
-hash = "4d44d520864a8e4a6b3746adfc5145cee07a54a7c22978414ea65052938a5451"
+hash = "b42eb671ea3dcbe334ab42bd8fed1cad5ee12e3c18b6ce8d7b6fd18c6dade5d8"
 
 [[files]]
 file = "kubejs/client_scripts/easyStructuresLangFix.js"

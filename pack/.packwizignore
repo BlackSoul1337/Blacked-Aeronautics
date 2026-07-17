@@ -1,6 +1,7 @@
 # Packwiz control files
 .packwizignore
 .nojekyll
+mirror-assets/
 
 # Local/editor noise must never be published
 .git/
@@ -10,4 +11,3 @@
 *.log
 Thumbs.db
 .DS_Store
-

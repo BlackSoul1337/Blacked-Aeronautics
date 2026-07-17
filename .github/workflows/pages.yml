@@ -7,6 +7,7 @@ on:
       - "pack/**"
       - "pages/**"
       - "scripts/refresh-pack.ps1"
+      - "scripts/refresh-mirror-assets.ps1"
       - "scripts/validate-pack.ps1"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
@@ -47,6 +48,10 @@ jobs:
       - name: Refresh and validate pack
         shell: pwsh
         run: ./scripts/refresh-pack.ps1 -PackwizPath "$env:GITHUB_WORKSPACE/.packwiz-bin/packwiz"
+
+      - name: Verify committed mirror assets
+        shell: bash
+        run: git diff --exit-code -- pack/mirror-assets
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5

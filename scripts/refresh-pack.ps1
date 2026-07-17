@@ -31,6 +31,8 @@ if (-not (Test-Path -LiteralPath (Join-Path $packRootFullPath 'pack.toml') -Path
     throw "pack.toml was not found in: $packRootFullPath"
 }
 
+& (Join-Path $PSScriptRoot 'refresh-mirror-assets.ps1') -PackRoot $packRootFullPath
+
 Push-Location $packRootFullPath
 try {
     & $packwizFullPath refresh --build
