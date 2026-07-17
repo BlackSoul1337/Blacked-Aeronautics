@@ -39,7 +39,7 @@ Get-ChildItem -LiteralPath $mirrorPath -Filter '*.b64' -File | Where-Object {
 $manifest = [ordered]@{
     format = 1
     assets = @($assets)
-} | ConvertTo-Json -Depth 4
+} | ConvertTo-Json -Depth 4 -Compress
 $manifest = $manifest.Replace("`r`n", "`n").Replace("`r", "`n").TrimEnd("`n")
 [System.IO.File]::WriteAllText(
     (Join-Path $mirrorPath 'manifest.json'),

@@ -1,15 +1,1 @@
-{
-    "format":  1,
-    "assets":  [
-                   {
-                       "name":  "create_salvage-1.1.0+create6.0.10.jar",
-                       "source":  "create_salvage-1.1.0+create6.0.10.jar.b64",
-                       "sha256":  "d3b30960509cde38559e6f381a1da222da191080a41725cea8b02b6b29df7af4"
-                   },
-                   {
-                       "name":  "reveal-1.0.0.jar",
-                       "source":  "reveal-1.0.0.jar.b64",
-                       "sha256":  "bd410142e92a4f3e1deda4153f8bd1c3a9c063126bfdbab5f72d8f48446688c2"
-                   }
-               ]
-}
+{"format":1,"assets":[{"name":"create_salvage-1.1.0+create6.0.10.jar","source":"create_salvage-1.1.0+create6.0.10.jar.b64","sha256":"d3b30960509cde38559e6f381a1da222da191080a41725cea8b02b6b29df7af4"},{"name":"reveal-1.0.0.jar","source":"reveal-1.0.0.jar.b64","sha256":"bd410142e92a4f3e1deda4153f8bd1c3a9c063126bfdbab5f72d8f48446688c2"}]}
