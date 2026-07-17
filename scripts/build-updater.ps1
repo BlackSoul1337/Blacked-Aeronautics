@@ -37,6 +37,7 @@ $arguments = @(
     '/target:winexe',
     '/platform:x64',
     '/optimize+',
+    '/codepage:65001',
     "/out:$output"
 ) + ($references | ForEach-Object { "/reference:$_" }) + @($source)
 

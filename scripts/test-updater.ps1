@@ -94,11 +94,29 @@ try {
     $updateNeoForge = $program.GetMethod('UpdateNeoForgeManifest', [System.Reflection.BindingFlags]'Static, NonPublic')
     $migratePackwiz = $program.GetMethod('TryMigratePackwizCommand', [System.Reflection.BindingFlags]'Static, NonPublic')
     $needsShorterGamePath = $program.GetMethod('NeedsShorterGamePath', [System.Reflection.BindingFlags]'Static, NonPublic')
+    $isSetupInstall = $program.GetMethod('IsSetupInstall', [System.Reflection.BindingFlags]'Static, NonPublic')
     if ($compare.Invoke($null, @('1.1.3-ely.2', '1.1.3-ely.1')) -le 0) {
         throw 'Updater version comparison test failed.'
     }
+    if ($compare.Invoke($null, @('1.1.6-ely.2', '1.1.6-ely.1')) -le 0) {
+        throw 'Updater must offer ely.2 to existing ely.1 installations.'
+    }
     if ($quote.Invoke($null, @('C:\Folder with spaces\file.exe')) -ne '"C:\Folder with spaces\file.exe"') {
         throw 'Updater Windows argument quoting test failed.'
+    }
+    $setupDetectionRoot = Join-Path $testRoot 'setup-detection'
+    $newUninstaller = Join-Path $setupDetectionRoot 'uninstall\unins000.exe'
+    [System.IO.Directory]::CreateDirectory((Split-Path -Parent $newUninstaller)) | Out-Null
+    [System.IO.File]::WriteAllText($newUninstaller, 'test')
+    $setupDetectionArguments = New-Object 'System.Object[]' 1
+    $setupDetectionArguments[0] = $setupDetectionRoot.PSObject.BaseObject
+    if (-not $isSetupInstall.Invoke($null, $setupDetectionArguments)) {
+        throw 'Updater did not recognize the current Setup uninstall layout.'
+    }
+    Remove-Item -LiteralPath (Join-Path $setupDetectionRoot 'uninstall') -Recurse -Force
+    [System.IO.File]::WriteAllText((Join-Path $setupDetectionRoot 'unins000.exe'), 'test')
+    if (-not $isSetupInstall.Invoke($null, $setupDetectionArguments)) {
+        throw 'Updater did not recognize the legacy Setup uninstall layout.'
     }
     if (-not $needsShorterGamePath.Invoke($null, @('C:\Users\Example\AppData\Local\Programs\Blacked-Aeronautics-1.1.5-ely.1-win-x64-portable')) -or
         $needsShorterGamePath.Invoke($null, @('C:\Games\Blacked-Aeronautics'))) {
@@ -251,8 +269,21 @@ internal static class FakeJava
         throw 'Packwiz fallback did not try the primary source and mirror in order.'
     }
 
-    $pathResolutionLog = Join-Path $testRoot 'packwiz-path-resolution.log'
-    $pathResolutionState = Join-Path $testRoot 'packwiz-path-resolution.state'
+    $unicodeName = -join (@(
+        0x043F, 0x0443, 0x0442, 0x044C, 0x0020, 0x0441, 0x0020,
+        0x043A, 0x0438, 0x0440, 0x0438, 0x043B, 0x043B, 0x0438,
+        0x0446, 0x0435, 0x0439
+    ) | ForEach-Object { [char]$_ })
+    $unicodeRoot = Join-Path $testRoot $unicodeName
+    [System.IO.Directory]::CreateDirectory($unicodeRoot) | Out-Null
+    $unicodePackwizScript = Join-Path $unicodeRoot 'packwiz-update.ps1'
+    $unicodeFakeJava = Join-Path $unicodeRoot 'fake-java.exe'
+    $unicodeInstaller = Join-Path $unicodeRoot 'packwiz-installer.jar'
+    Copy-Item -LiteralPath $packwizScript -Destination $unicodePackwizScript
+    Copy-Item -LiteralPath $fakeJava -Destination $unicodeFakeJava
+    Copy-Item -LiteralPath $fakeInstaller -Destination $unicodeInstaller
+    $pathResolutionLog = Join-Path $unicodeRoot 'packwiz-path-resolution.log'
+    $pathResolutionState = Join-Path $unicodeRoot 'packwiz-path-resolution.state'
     [System.IO.File]::WriteAllText($pathResolutionState, 'succeed immediately')
     try {
         $env:FAKE_JAVA_LOG = $pathResolutionLog
@@ -265,9 +296,9 @@ internal static class FakeJava
                 '-ExecutionPolicy',
                 'Bypass',
                 '-File',
-                $packwizScript,
+                $unicodePackwizScript,
                 '-JavaPath',
-                $fakeJava,
+                $unicodeFakeJava,
                 '-PackUrls',
                 'https://primary.invalid/pack.toml'
             ) 2>&1)
@@ -283,11 +314,11 @@ internal static class FakeJava
     }
     if ($pathResolutionExitCode -ne 0) {
         $pathResolutionOutput | Write-Host
-        throw "Packwiz absolute -File path test failed with exit code $pathResolutionExitCode."
+        throw "Packwiz Unicode -File path test failed with exit code $pathResolutionExitCode."
     }
     $pathResolutionArgs = Get-Content -LiteralPath $pathResolutionLog -Raw
     if ($pathResolutionArgs -notmatch 'packwiz-installer\.jar') {
-        throw 'Packwiz installer path did not resolve relative to the script directory.'
+        throw 'Packwiz installer path did not resolve inside the Unicode script directory.'
     }
 
     $realJava = Join-Path $repoRoot 'jdk-21.0.11+10\bin\java.exe'

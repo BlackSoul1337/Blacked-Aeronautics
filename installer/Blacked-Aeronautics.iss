@@ -22,10 +22,10 @@ AppPublisher=BlackSoul1337
 AppPublisherURL=https://github.com/BlackSoul1337/Blacked-Aeronautics
 AppSupportURL=https://github.com/BlackSoul1337/Blacked-Aeronautics/issues
 AppUpdatesURL=https://github.com/BlackSoul1337/Blacked-Aeronautics/releases/latest
-DefaultDirName={localappdata}\Programs\Blacked Aeronautics
+DefaultDirName={%USERPROFILE}\Games\Blacked Aeronautics
 DefaultGroupName=Blacked Aeronautics
 DisableProgramGroupPage=yes
-DisableDirPage=yes
+DisableDirPage=no
 OutputDir={#SetupOutputDir}
 OutputBaseFilename=Blacked-Aeronautics-{#MyAppVersion}-win-x64-setup
 Compression=lzma2/ultra64
@@ -38,13 +38,23 @@ UninstallDisplayIcon={app}\{#MyAppExeName}
 CloseApplications=force
 RestartApplications=no
 SetupLogging=yes
+Uninstallable=yes
+CreateUninstallRegKey=yes
+UninstallFilesDir={app}\uninstall
 
 [Languages]
 Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
+[CustomMessages]
+russian.CreateStartMenuIcon=Создать ярлык в меню «Пуск»
+english.CreateStartMenuIcon=Create a Start Menu shortcut
+russian.InstallPathTooLong=Выбранный путь слишком длинный для Distant Horizons.%n%nВыберите папку ближе к корню диска, например C:\Games\Blacked Aeronautics.
+english.InstallPathTooLong=The selected path is too long for Distant Horizons.%n%nChoose a folder closer to the drive root, for example C:\Games\Blacked Aeronautics.
+
 [Tasks]
-Name: "desktopicon"; Description: "Создать ярлык на рабочем столе"; GroupDescription: "Дополнительные ярлыки:"; Flags: unchecked
+Name: "startmenuicon"; Description: "{cm:CreateStartMenuIcon}"; GroupDescription: "{cm:AdditionalIcons}"
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
 Source: "{#PortableSource}\*"; DestDir: "{app}"; Excludes: "\elyprismlauncher.cfg,\instances\Blacked-Aeronautics\instance.cfg"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -52,11 +62,29 @@ Source: "{#PortableSource}\elyprismlauncher.cfg"; DestDir: "{app}"; Flags: onlyi
 Source: "{#PortableSource}\instances\Blacked-Aeronautics\instance.cfg"; DestDir: "{app}\instances\Blacked-Aeronautics"; Flags: onlyifdoesntexist
 
 [Icons]
-Name: "{group}\Blacked Aeronautics"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"
+Name: "{group}\Blacked Aeronautics"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; Tasks: startmenuicon
 Name: "{autodesktop}\Blacked Aeronautics"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; Description: "Запустить Blacked Aeronautics"; WorkingDir: "{app}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}"; WorkingDir: "{app}"; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}"
+
+[Code]
+function NextButtonClick(CurPageID: Integer): Boolean;
+var
+  GameDirectory: String;
+begin
+  Result := True;
+  if CurPageID <> wpSelectDir then
+    Exit;
+
+  GameDirectory := AddBackslash(WizardDirValue) +
+    'instances\Blacked-Aeronautics\minecraft';
+  if Length(GameDirectory) > 110 then
+  begin
+    MsgBox(ExpandConstant('{cm:InstallPathTooLong}'), mbError, MB_OK);
+    Result := False;
+  end;
+end;

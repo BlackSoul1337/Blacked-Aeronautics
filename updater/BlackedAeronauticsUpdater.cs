@@ -297,7 +297,7 @@ namespace BlackedAeronauticsUpdater
                         return;
                     }
 
-                    bool setupInstall = File.Exists(Path.Combine(root, "unins000.exe"));
+                    bool setupInstall = IsSetupInstall(root);
                     string suffix = setupInstall ? "-win-x64-setup.exe" : "-win-x64-portable.zip";
                     ReleaseAsset asset = FindAsset(release, latestVersion, suffix);
                     ValidateDigest(asset);
@@ -555,6 +555,12 @@ namespace BlackedAeronauticsUpdater
                 }
             }
             throw new InvalidDataException("В новом Release пока нет подходящего файла для Windows x64.");
+        }
+
+        private static bool IsSetupInstall(string root)
+        {
+            return File.Exists(Path.Combine(root, "unins000.exe")) ||
+                   File.Exists(Path.Combine(root, "uninstall", "unins000.exe"));
         }
 
         private static void ValidateDigest(ReleaseAsset asset)
