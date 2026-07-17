@@ -62,12 +62,34 @@ namespace BlackedAeronauticsUpdater
         public string mode { get; set; }
     }
 
+    internal sealed class TimeoutWebClient : WebClient
+    {
+        private readonly int timeoutMilliseconds;
+
+        public TimeoutWebClient(int timeoutMilliseconds)
+        {
+            if (timeoutMilliseconds <= 0)
+                throw new ArgumentOutOfRangeException("timeoutMilliseconds");
+            this.timeoutMilliseconds = timeoutMilliseconds;
+        }
+
+        protected override WebRequest GetWebRequest(Uri address)
+        {
+            WebRequest request = base.GetWebRequest(address);
+            request.Timeout = timeoutMilliseconds;
+            HttpWebRequest httpRequest = request as HttpWebRequest;
+            if (httpRequest != null)
+                httpRequest.ReadWriteTimeout = timeoutMilliseconds;
+            return request;
+        }
+    }
+
     internal sealed class DownloadDialog : Form
     {
         private readonly ProgressBar progress;
         private readonly Label status;
         private readonly Button cancel;
-        private WebClient client;
+        private TimeoutWebClient client;
         private Exception error;
         private bool wasCancelled;
 
@@ -112,15 +134,28 @@ namespace BlackedAeronauticsUpdater
 
         public void Download(string url, string destination, string userAgent)
         {
-            client = new WebClient();
-            client.Headers[HttpRequestHeader.UserAgent] = userAgent;
-            client.Headers[HttpRequestHeader.Accept] = "application/octet-stream";
-            client.DownloadProgressChanged += OnProgress;
-            client.DownloadFileCompleted += OnCompleted;
-            client.DownloadFileAsync(new Uri(url), destination);
-            ShowDialog();
-            client.Dispose();
-            client = null;
+            error = null;
+            wasCancelled = false;
+            client = new TimeoutWebClient(30000);
+            client.Proxy = WebRequest.GetSystemWebProxy();
+            if (client.Proxy != null)
+                client.Proxy.Credentials = CredentialCache.DefaultCredentials;
+            try
+            {
+                client.Headers[HttpRequestHeader.UserAgent] = userAgent;
+                client.Headers[HttpRequestHeader.Accept] = "application/octet-stream";
+                client.DownloadProgressChanged += OnProgress;
+                client.DownloadFileCompleted += OnCompleted;
+                client.DownloadFileAsync(new Uri(url), destination);
+                ShowDialog();
+            }
+            finally
+            {
+                client.DownloadProgressChanged -= OnProgress;
+                client.DownloadFileCompleted -= OnCompleted;
+                client.Dispose();
+                client = null;
+            }
 
             if (wasCancelled)
                 throw new OperationCanceledException();
@@ -209,6 +244,7 @@ namespace BlackedAeronauticsUpdater
             string configPath = Path.Combine(root, ConfigName);
             UpdateConfig config = ReadJson<UpdateConfig>(configPath);
             ValidateConfig(config);
+            WarnIfGamePathIsLong(root);
             TryMigratePackwizCommand(root);
             TrySyncLoaderVersion(root, config.packUrl, config.packMirrorUrl);
 
@@ -273,6 +309,7 @@ namespace BlackedAeronauticsUpdater
                     using (DownloadDialog dialog = new DownloadDialog())
                         dialog.Download(asset.browser_download_url, downloadPath, UserAgent(config.version));
 
+                    VerifyFileLength(downloadPath, asset.size);
                     VerifyFile(downloadPath, asset.digest.Substring("sha256:".Length));
 
                     if (setupInstall)
@@ -307,6 +344,7 @@ namespace BlackedAeronauticsUpdater
             request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
             request.Timeout = 10000;
             request.ReadWriteTimeout = 10000;
+            ConfigureSystemProxy(request);
 
             using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
             using (Stream stream = response.GetResponseStream())
@@ -331,6 +369,7 @@ namespace BlackedAeronauticsUpdater
                     request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
                     request.Timeout = 10000;
                     request.ReadWriteTimeout = 10000;
+                    ConfigureSystemProxy(request);
 
                     string packToml;
                     using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
@@ -365,12 +404,20 @@ namespace BlackedAeronauticsUpdater
                 const string legacyCommand =
                     "PreLaunchCommand=\"\\\"$INST_JAVA\\\" -jar packwiz-installer-bootstrap.jar " +
                     "https://blacksoul1337.github.io/Blacked-Aeronautics/pack.toml\"";
-                const string mirroredCommand =
+                const string relativeCommand =
                     "PreLaunchCommand=\"powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass " +
                     "-File packwiz-update.ps1 -JavaPath \\\"$INST_JAVA\\\"\"";
+                const string absoluteCommand =
+                    "PreLaunchCommand=\"powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass " +
+                    "-File \\\"$INST_MC_DIR/packwiz-update.ps1\\\" -JavaPath \\\"$INST_JAVA\\\"\"";
 
                 string content = File.ReadAllText(instanceConfig, Encoding.UTF8);
-                if (content.IndexOf(legacyCommand, StringComparison.Ordinal) < 0)
+                string sourceCommand = null;
+                if (content.IndexOf(legacyCommand, StringComparison.Ordinal) >= 0)
+                    sourceCommand = legacyCommand;
+                else if (content.IndexOf(relativeCommand, StringComparison.Ordinal) >= 0)
+                    sourceCommand = relativeCommand;
+                if (sourceCommand == null)
                     return false;
 
                 string temporary = instanceConfig + ".update-" + Guid.NewGuid().ToString("N");
@@ -378,7 +425,7 @@ namespace BlackedAeronauticsUpdater
                 {
                     File.WriteAllText(
                         temporary,
-                        content.Replace(legacyCommand, mirroredCommand),
+                        content.Replace(sourceCommand, absoluteCommand),
                         new UTF8Encoding(false));
                     File.Copy(temporary, instanceConfig, true);
                 }
@@ -397,6 +444,25 @@ namespace BlackedAeronauticsUpdater
             {
                 return false;
             }
+        }
+
+        private static void WarnIfGamePathIsLong(string root)
+        {
+            if (!NeedsShorterGamePath(root))
+                return;
+
+            MessageBox.Show(
+                "Папка Portable находится слишком глубоко. Distant Horizons может не открыть свои файлы.\n\n" +
+                "Закройте лаунчер и перенесите папку Blacked-Aeronautics ближе к корню диска, например в C:\\Games.",
+                ProductName,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+        }
+
+        private static bool NeedsShorterGamePath(string root)
+        {
+            string gameRoot = SafePath(root, "instances/Blacked-Aeronautics/minecraft");
+            return gameRoot.Length > 110;
         }
 
         private static string ExtractNeoForgeVersion(string packToml)
@@ -495,6 +561,13 @@ namespace BlackedAeronauticsUpdater
         {
             if (asset == null || string.IsNullOrWhiteSpace(asset.browser_download_url))
                 throw new InvalidDataException("У файла обновления нет адреса загрузки.");
+            Uri downloadUri;
+            if (!Uri.TryCreate(asset.browser_download_url, UriKind.Absolute, out downloadUri) ||
+                downloadUri.Scheme != Uri.UriSchemeHttps ||
+                !string.Equals(downloadUri.Host, "github.com", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidDataException("GitHub вернул небезопасный адрес загрузки обновления.");
+            if (asset.size <= 0 || asset.size > 1073741824L)
+                throw new InvalidDataException("GitHub вернул неверный размер обновления.");
             if (string.IsNullOrWhiteSpace(asset.digest) ||
                 !Regex.IsMatch(asset.digest, "^sha256:[0-9a-fA-F]{64}$", RegexOptions.CultureInvariant))
                 throw new InvalidDataException("GitHub не предоставил контрольную сумму обновления.");
@@ -517,7 +590,11 @@ namespace BlackedAeronauticsUpdater
             });
             start.WorkingDirectory = Path.GetTempPath();
             start.UseShellExecute = true;
-            Process.Start(start);
+            using (Process process = Process.Start(start))
+            {
+                if (process == null)
+                    throw new InvalidOperationException("Не удалось запустить установщик обновления.");
+            }
         }
 
         private static void ApplySetup(string[] args)
@@ -537,11 +614,14 @@ namespace BlackedAeronauticsUpdater
             install.Arguments = "/VERYSILENT /SUPPRESSMSGBOXES /CLOSEAPPLICATIONS /NORESTART /DIR=" + Quote(targetRoot);
             install.WorkingDirectory = Path.GetDirectoryName(setupPath);
             install.UseShellExecute = true;
-            Process process = Process.Start(install);
-            process.WaitForExit();
-
-            if (process.ExitCode != 0)
-                throw new InvalidOperationException("Установщик завершился с ошибкой.");
+            using (Process process = Process.Start(install))
+            {
+                if (process == null)
+                    throw new InvalidOperationException("Не удалось запустить установщик обновления.");
+                process.WaitForExit();
+                if (process.ExitCode != 0)
+                    throw new InvalidOperationException("Установщик завершился с ошибкой.");
+            }
 
             CleanupWorkDirectory(workRoot);
             RelaunchWrapper(targetRoot);
@@ -769,6 +849,13 @@ namespace BlackedAeronauticsUpdater
                 throw new InvalidDataException("Контрольная сумма обновления не совпала.");
         }
 
+        private static void VerifyFileLength(string path, long expectedLength)
+        {
+            FileInfo file = new FileInfo(path);
+            if (!file.Exists || file.Length != expectedLength)
+                throw new InvalidDataException("Размер загруженного обновления не совпал.");
+        }
+
         private static string ToHex(byte[] bytes)
         {
             StringBuilder result = new StringBuilder(bytes.Length * 2);
@@ -806,6 +893,13 @@ namespace BlackedAeronauticsUpdater
                 parsed.Scheme != Uri.UriSchemeHttps ||
                 !string.Equals(parsed.Host, expectedHost, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidDataException("Адрес обновления сборки повреждён.");
+        }
+
+        private static void ConfigureSystemProxy(HttpWebRequest request)
+        {
+            request.Proxy = WebRequest.GetSystemWebProxy();
+            if (request.Proxy != null)
+                request.Proxy.Credentials = CredentialCache.DefaultCredentials;
         }
 
         private static int CompareVersions(string left, string right)
@@ -881,15 +975,24 @@ namespace BlackedAeronauticsUpdater
         {
             try
             {
-                Process process = Process.GetProcessById(processId);
-                process.WaitForExit(30000);
+                using (Process process = Process.GetProcessById(processId))
+                    process.WaitForExit(30000);
             }
             catch (ArgumentException) { }
         }
 
         private static bool IsLauncherRunning()
         {
-            return Process.GetProcessesByName("elyprismlauncher").Length > 0;
+            Process[] processes = Process.GetProcessesByName("elyprismlauncher");
+            try
+            {
+                return processes.Length > 0;
+            }
+            finally
+            {
+                foreach (Process process in processes)
+                    process.Dispose();
+            }
         }
 
         private static void RelaunchWrapper(string root)
@@ -923,7 +1026,11 @@ namespace BlackedAeronauticsUpdater
                 start.UseShellExecute = true;
                 if (!string.IsNullOrWhiteSpace(arguments))
                     start.Arguments = arguments;
-                Process.Start(start);
+                using (Process process = Process.Start(start))
+                {
+                    if (process == null)
+                        return false;
+                }
                 return true;
             }
             catch { return false; }

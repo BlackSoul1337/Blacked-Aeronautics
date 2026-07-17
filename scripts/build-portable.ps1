@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$Version = '1.1.5-ely.1',
+    [string]$Version = '1.1.6-ely.1',
     [string]$LauncherSource = (Join-Path $PSScriptRoot '..\elyprism'),
     [string]$JavaSource = (Join-Path $PSScriptRoot '..\jdk-21.0.11+10'),
     [string]$TemplateSource = (Join-Path $PSScriptRoot '..\launcher-template'),
@@ -69,6 +69,7 @@ Assert-ChildPath $outputRootPath $repoRoot
 [System.IO.Directory]::CreateDirectory($outputRootPath) | Out-Null
 
 $artifactBaseName = "Blacked-Aeronautics-$Version-win-x64-portable"
+$portableFolderName = 'Blacked-Aeronautics'
 $portableDirectory = Join-Path $outputRootPath $artifactBaseName
 $archivePath = Join-Path $outputRootPath "$artifactBaseName.zip"
 $staleSidecarPath = "$archivePath.sha256"
@@ -195,7 +196,7 @@ $archive = [System.IO.Compression.ZipFile]::Open($archivePath, [System.IO.Compre
 try {
     Get-ChildItem -LiteralPath $portableDirectory -Recurse -File -Force | ForEach-Object {
         $relativeEntryName = $_.FullName.Substring($portableDirectory.TrimEnd('\', '/').Length + 1).Replace('\', '/')
-        $entryName = "$artifactBaseName/$relativeEntryName"
+        $entryName = "$portableFolderName/$relativeEntryName"
         [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
             $archive,
             $_.FullName,

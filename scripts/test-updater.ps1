@@ -93,11 +93,16 @@ try {
     $extractNeoForge = $program.GetMethod('ExtractNeoForgeVersion', [System.Reflection.BindingFlags]'Static, NonPublic')
     $updateNeoForge = $program.GetMethod('UpdateNeoForgeManifest', [System.Reflection.BindingFlags]'Static, NonPublic')
     $migratePackwiz = $program.GetMethod('TryMigratePackwizCommand', [System.Reflection.BindingFlags]'Static, NonPublic')
+    $needsShorterGamePath = $program.GetMethod('NeedsShorterGamePath', [System.Reflection.BindingFlags]'Static, NonPublic')
     if ($compare.Invoke($null, @('1.1.3-ely.2', '1.1.3-ely.1')) -le 0) {
         throw 'Updater version comparison test failed.'
     }
     if ($quote.Invoke($null, @('C:\Folder with spaces\file.exe')) -ne '"C:\Folder with spaces\file.exe"') {
         throw 'Updater Windows argument quoting test failed.'
+    }
+    if (-not $needsShorterGamePath.Invoke($null, @('C:\Users\Example\AppData\Local\Programs\Blacked-Aeronautics-1.1.5-ely.1-win-x64-portable')) -or
+        $needsShorterGamePath.Invoke($null, @('C:\Games\Blacked-Aeronautics'))) {
+        throw 'Updater Distant Horizons path warning test failed.'
     }
     $samplePack = @'
 [versions]
@@ -149,10 +154,22 @@ neoforge = "21.1.238"
         throw 'Updater packwiz command migration did not report a change.'
     }
     $migratedConfig = Get-Content -LiteralPath $migrationConfig -Raw
-    if ($migratedConfig -notmatch 'packwiz-update\.ps1' -or
+    if ($migratedConfig -notmatch '\$INST_MC_DIR/packwiz-update\.ps1' -or
         $migratedConfig -match 'packwiz-installer-bootstrap' -or
         $migratedConfig -notmatch 'MaxMemAlloc=6144') {
         throw 'Updater packwiz command migration failed.'
+    }
+
+    $relativeCommand = 'PreLaunchCommand="powershell.exe -NoProfile -NonInteractive ' +
+        '-ExecutionPolicy Bypass -File packwiz-update.ps1 -JavaPath \"$INST_JAVA\""'
+    [System.IO.File]::WriteAllText($migrationConfig, "[General]`n$relativeCommand`nMaxMemAlloc=7168`n")
+    if (-not $migratePackwiz.Invoke($null, $migrationArguments)) {
+        throw 'Updater relative packwiz command migration did not report a change.'
+    }
+    $migratedConfig = Get-Content -LiteralPath $migrationConfig -Raw
+    if ($migratedConfig -notmatch '\$INST_MC_DIR/packwiz-update\.ps1' -or
+        $migratedConfig -notmatch 'MaxMemAlloc=7168') {
+        throw 'Updater relative packwiz command migration failed.'
     }
 
     $fakeJava = Join-Path $testRoot 'fake-java.exe'
@@ -185,6 +202,10 @@ internal static class FakeJava
         throw "Fake Java compilation failed with exit code $LASTEXITCODE."
     }
     $packwizScript = Join-Path $repoRoot 'launcher-template\instances\Blacked-Aeronautics\minecraft\packwiz-update.ps1'
+    $packwizScriptContent = Get-Content -LiteralPath $packwizScript -Raw
+    if ($packwizScriptContent -match '\[string\]\$InstallerPath\s*=\s*\(Join-Path\s+\$PSScriptRoot') {
+        throw 'Packwiz installer path is evaluated before the script root fallback.'
+    }
     $childCommand = "& '$($packwizScript.Replace("'", "''"))' -JavaPath '$($fakeJava.Replace("'", "''"))' " +
         "-InstallerPath '$($fakeInstaller.Replace("'", "''"))' " +
         "-PackUrls @('https://primary.invalid/pack.toml','https://mirror.invalid/pack.toml')"
@@ -221,8 +242,71 @@ internal static class FakeJava
     if ($fallbackLog.Count -ne 2 -or
         $fallbackLog[0] -notmatch 'primary\.invalid' -or
         $fallbackLog[1] -notmatch 'mirror\.invalid' -or
-        $fallbackLog[1] -notmatch 'java\.net\.useSystemProxies=true') {
+        $fallbackLog[1] -notmatch 'java\.net\.useSystemProxies=true' -or
+        $fallbackLog[1] -notmatch '-cp' -or
+        $fallbackLog[1] -notmatch 'link\.infra\.packwiz\.installer\.Main' -or
+        $fallbackLog[1] -match '-jar' -or
+        $fallbackLog[1] -notmatch '--no-gui' -or
+        $fallbackLog[1] -notmatch '--timeout 15') {
         throw 'Packwiz fallback did not try the primary source and mirror in order.'
+    }
+
+    $pathResolutionLog = Join-Path $testRoot 'packwiz-path-resolution.log'
+    $pathResolutionState = Join-Path $testRoot 'packwiz-path-resolution.state'
+    [System.IO.File]::WriteAllText($pathResolutionState, 'succeed immediately')
+    try {
+        $env:FAKE_JAVA_LOG = $pathResolutionLog
+        $env:FAKE_JAVA_STATE = $pathResolutionState
+        Push-Location $testRoot
+        try {
+            $pathResolutionOutput = @(& powershell.exe @(
+                '-NoProfile',
+                '-NonInteractive',
+                '-ExecutionPolicy',
+                'Bypass',
+                '-File',
+                $packwizScript,
+                '-JavaPath',
+                $fakeJava,
+                '-PackUrls',
+                'https://primary.invalid/pack.toml'
+            ) 2>&1)
+            $pathResolutionExitCode = $LASTEXITCODE
+        }
+        finally {
+            Pop-Location
+        }
+    }
+    finally {
+        $env:FAKE_JAVA_LOG = $previousFakeLog
+        $env:FAKE_JAVA_STATE = $previousFakeState
+    }
+    if ($pathResolutionExitCode -ne 0) {
+        $pathResolutionOutput | Write-Host
+        throw "Packwiz absolute -File path test failed with exit code $pathResolutionExitCode."
+    }
+    $pathResolutionArgs = Get-Content -LiteralPath $pathResolutionLog -Raw
+    if ($pathResolutionArgs -notmatch 'packwiz-installer\.jar') {
+        throw 'Packwiz installer path did not resolve relative to the script directory.'
+    }
+
+    $realJava = Join-Path $repoRoot 'jdk-21.0.11+10\bin\java.exe'
+    $realInstaller = Join-Path $repoRoot 'launcher-template\instances\Blacked-Aeronautics\minecraft\packwiz-installer.jar'
+    $missingPack = [uri](Join-Path $testRoot 'missing-pack.toml')
+    $previousErrorAction = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        $installerSmokeOutput = @(& $realJava '-cp' $realInstaller 'link.infra.packwiz.installer.Main' `
+            '--no-gui' '--timeout' '1' $missingPack.AbsoluteUri 2>&1)
+        $installerSmokeExitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorAction
+    }
+    $installerSmokeText = $installerSmokeOutput -join "`n"
+    if ($installerSmokeExitCode -eq 0 -or
+        $installerSmokeText -match 'must be run through packwiz-installer-bootstrap|ClassNotFoundException') {
+        throw 'The bundled packwiz-installer direct invocation test failed.'
     }
 
     Write-Host 'Updater tests passed.'
