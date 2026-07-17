@@ -3,6 +3,10 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$JavaPath,
     [string]$InstallerPath,
+    [ValidateRange(1, 3)]
+    [int]$AttemptsPerSource = 2,
+    [ValidateRange(15, 300)]
+    [int]$DownloadTimeoutSeconds = 60,
     [string[]]$PackUrls = @(
         'https://blacksoul1337.github.io/Blacked-Aeronautics/pack.toml',
         'https://cdn.jsdelivr.net/gh/BlackSoul1337/Blacked-Aeronautics@main/pack/pack.toml'
@@ -15,6 +19,15 @@ if ($PSVersionTable.PSVersion.Major -lt 5) {
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+
+$utf8 = New-Object System.Text.UTF8Encoding($false)
+try {
+    [Console]::OutputEncoding = $utf8
+}
+catch {
+    # Some non-interactive hosts do not expose a configurable console.
+}
+$OutputEncoding = $utf8
 
 $scriptFile = [string]$MyInvocation.MyCommand.Path
 if (-not [string]::IsNullOrWhiteSpace($scriptFile)) {
@@ -75,6 +88,45 @@ function Get-Sha256Hex([byte[]]$Bytes) {
     }
     finally {
         $sha256.Dispose()
+    }
+}
+
+function Write-ProcessOutput([string]$Text) {
+    if (-not [string]::IsNullOrWhiteSpace($Text)) {
+        Write-Host $Text.TrimEnd()
+    }
+}
+
+function Invoke-PackwizInstaller([string]$Java, [string]$Installer, [string]$PackUrl) {
+    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $startInfo.FileName = $Java
+    $startInfo.Arguments = (
+        '-Djava.net.useSystemProxies=true -Dfile.encoding=UTF-8 ' +
+        '-Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8 ' +
+        '-cp "{0}" link.infra.packwiz.installer.Main --no-gui --timeout {1} "{2}"'
+    ) -f $Installer, $DownloadTimeoutSeconds, $PackUrl
+    $startInfo.WorkingDirectory = $ScriptRoot
+    $startInfo.UseShellExecute = $false
+    $startInfo.CreateNoWindow = $true
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+    $startInfo.StandardOutputEncoding = $utf8
+    $startInfo.StandardErrorEncoding = $utf8
+
+    $process = $null
+    try {
+        $process = [System.Diagnostics.Process]::Start($startInfo)
+        $standardOutput = $process.StandardOutput.ReadToEndAsync()
+        $standardError = $process.StandardError.ReadToEndAsync()
+        $process.WaitForExit()
+        Write-ProcessOutput $standardOutput.Result
+        Write-ProcessOutput $standardError.Result
+        return $process.ExitCode
+    }
+    finally {
+        if ($null -ne $process) {
+            $process.Dispose()
+        }
     }
 }
 
@@ -150,6 +202,13 @@ if (-not (Test-Path -LiteralPath $installer -PathType Leaf)) {
 if ($PackUrls.Count -eq 0) {
     throw 'No Blacked Aeronautics update sources are configured.'
 }
+foreach ($packUrl in $PackUrls) {
+    $packUri = $null
+    if (-not [uri]::TryCreate($packUrl, [System.UriKind]::Absolute, [ref]$packUri) -or
+        $packUri.Scheme -ne [uri]::UriSchemeHttps) {
+        throw "Refusing an invalid update source: $packUrl"
+    }
+}
 
 $consoleJava = Join-Path (Split-Path -Parent $java) 'java.exe'
 if (Test-Path -LiteralPath $consoleJava -PathType Leaf) {
@@ -157,42 +216,32 @@ if (Test-Path -LiteralPath $consoleJava -PathType Leaf) {
 }
 
 $lastExitCode = 1
+$attemptNumber = 0
+$totalAttempts = $PackUrls.Count * $AttemptsPerSource
 Push-Location $ScriptRoot
 try {
-    for ($index = 0; $index -lt $PackUrls.Count; $index++) {
-        $packUrl = $PackUrls[$index]
-        Write-Host "Updating Blacked Aeronautics from $packUrl"
-        try {
-            Install-MirrorAssets $packUrl
-        }
-        catch {
-            Write-Warning "The mirror support files failed validation: $($_.Exception.Message)"
-            $lastExitCode = 1
-            continue
-        }
-        $startInfo = New-Object System.Diagnostics.ProcessStartInfo
-        $startInfo.FileName = $java
-        $startInfo.Arguments = '-Djava.net.useSystemProxies=true -cp "{0}" link.infra.packwiz.installer.Main --no-gui --timeout 15 "{1}"' -f $installer, $packUrl
-        $startInfo.WorkingDirectory = $ScriptRoot
-        $startInfo.UseShellExecute = $false
-        $startInfo.CreateNoWindow = $true
-        $process = $null
-        try {
-            $process = [System.Diagnostics.Process]::Start($startInfo)
-            $process.WaitForExit()
-            $lastExitCode = $process.ExitCode
-        }
-        finally {
-            if ($null -ne $process) {
-                $process.Dispose()
+    for ($round = 1; $round -le $AttemptsPerSource; $round++) {
+        for ($index = 0; $index -lt $PackUrls.Count; $index++) {
+            $packUrl = $PackUrls[$index]
+            $attemptNumber++
+            Write-Host "Updating Blacked Aeronautics from $packUrl"
+            Write-Host "Update attempt $attemptNumber of $totalAttempts"
+            try {
+                Install-MirrorAssets $packUrl
+                $lastExitCode = Invoke-PackwizInstaller $java $installer $packUrl
             }
-        }
-        Write-Host "Update source exit code: $lastExitCode"
-        if ($lastExitCode -eq 0) {
-            exit 0
-        }
-        if ($index + 1 -lt $PackUrls.Count) {
-            Write-Warning 'The primary update source failed. Trying the mirror.'
+            catch {
+                Write-Host "Update attempt failed: $($_.Exception.Message)"
+                $lastExitCode = 1
+            }
+            Write-Host "Update source exit code: $lastExitCode"
+            if ($lastExitCode -eq 0) {
+                exit 0
+            }
+            if ($attemptNumber -lt $totalAttempts) {
+                Write-Host 'The update is incomplete. Retrying automatically.'
+                Start-Sleep -Seconds 2
+            }
         }
     }
 }
@@ -200,5 +249,5 @@ finally {
     Pop-Location
 }
 
-Write-Error 'All Blacked Aeronautics update sources failed.' -ErrorAction Continue
+Write-Host 'All Blacked Aeronautics update sources failed.'
 exit $lastExitCode

@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$Version = '1.1.6-ely.2',
+    [string]$Version = '1.1.6-ely.3',
     [string]$LauncherSource = (Join-Path $PSScriptRoot '..\elyprism'),
     [string]$JavaSource = (Join-Path $PSScriptRoot '..\jdk-21.0.11+10'),
     [string]$TemplateSource = (Join-Path $PSScriptRoot '..\launcher-template'),

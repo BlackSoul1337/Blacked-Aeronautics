@@ -101,6 +101,9 @@ try {
     if ($compare.Invoke($null, @('1.1.6-ely.2', '1.1.6-ely.1')) -le 0) {
         throw 'Updater must offer ely.2 to existing ely.1 installations.'
     }
+    if ($compare.Invoke($null, @('1.1.6-ely.3', '1.1.6-ely.2')) -le 0) {
+        throw 'Updater must offer ely.3 to existing ely.2 installations.'
+    }
     if ($quote.Invoke($null, @('C:\Folder with spaces\file.exe')) -ne '"C:\Folder with spaces\file.exe"') {
         throw 'Updater Windows argument quoting test failed.'
     }
@@ -207,6 +210,7 @@ internal static class FakeJava
         string log = Environment.GetEnvironmentVariable("FAKE_JAVA_LOG");
         string state = Environment.GetEnvironmentVariable("FAKE_JAVA_STATE");
         File.AppendAllText(log, string.Join(" ", args) + Environment.NewLine);
+        Console.WriteLine("fake packwiz output");
         if (File.Exists(state))
             return 0;
         File.WriteAllText(state, "failed once");
@@ -265,8 +269,47 @@ internal static class FakeJava
         $fallbackLog[1] -notmatch 'link\.infra\.packwiz\.installer\.Main' -or
         $fallbackLog[1] -match '-jar' -or
         $fallbackLog[1] -notmatch '--no-gui' -or
-        $fallbackLog[1] -notmatch '--timeout 15') {
+        $fallbackLog[1] -notmatch '--timeout 60') {
         throw 'Packwiz fallback did not try the primary source and mirror in order.'
+    }
+    if (($fallbackOutput -join "`n") -notmatch 'fake packwiz output') {
+        throw 'Packwiz output is not forwarded to the launcher log.'
+    }
+
+    Remove-Item -LiteralPath $fakeLog, $fakeState -Force -ErrorAction SilentlyContinue
+    $retryCommand = "& '$($packwizScript.Replace("'", "''"))' " +
+        "-JavaPath '$($fakeJava.Replace("'", "''"))' " +
+        "-InstallerPath '$($fakeInstaller.Replace("'", "''"))' " +
+        "-PackUrls @('https://primary.invalid/pack.toml')"
+    $encodedRetryCommand = [Convert]::ToBase64String(
+        [System.Text.Encoding]::Unicode.GetBytes($retryCommand)
+    )
+    try {
+        $env:FAKE_JAVA_LOG = $fakeLog
+        $env:FAKE_JAVA_STATE = $fakeState
+        $retryOutput = @(& powershell.exe @(
+            '-NoProfile',
+            '-NonInteractive',
+            '-ExecutionPolicy',
+            'Bypass',
+            '-EncodedCommand',
+            $encodedRetryCommand
+        ) 2>&1)
+        $retryExitCode = $LASTEXITCODE
+    }
+    finally {
+        $env:FAKE_JAVA_LOG = $previousFakeLog
+        $env:FAKE_JAVA_STATE = $previousFakeState
+    }
+    if ($retryExitCode -ne 0) {
+        $retryOutput | Write-Host
+        throw "Packwiz automatic retry test failed with exit code $retryExitCode."
+    }
+    $retryLog = @(Get-Content -LiteralPath $fakeLog)
+    if ($retryLog.Count -ne 2 -or
+        $retryLog[0] -notmatch 'primary\.invalid' -or
+        $retryLog[1] -notmatch 'primary\.invalid') {
+        throw 'Packwiz did not retry an incomplete first update automatically.'
     }
 
     $unicodeName = -join (@(
