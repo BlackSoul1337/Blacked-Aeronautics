@@ -164,6 +164,7 @@ if ((Test-Path -LiteralPath $packTomlPath -PathType Leaf) -and (Test-Path -Liter
     $indexContent = (Get-Content -LiteralPath $indexPath -Raw).Replace("`r`n", "`n")
     foreach ($requiredPreservePath in @(
         'options.txt',
+        'config/DistantHorizons.toml',
         'config/quickskin-client.json',
         'config/voicechat/voicechat-client.properties'
     )) {

@@ -15,6 +15,7 @@ function Write-Utf8NoBom([string]$Path, [string]$Content) {
 function Test-PreservedPath([string]$Path) {
     $normalized = $Path.Replace('\', '/')
     if ($normalized -eq 'options.txt') { return $true }
+    if ($normalized -eq 'config/DistantHorizons.toml') { return $true }
     if ($normalized -match '^config/xaero/') { return $true }
     if ($normalized -eq 'config/quickskin-client.json') { return $true }
     if ($normalized -match '^config/voicechat/(voicechat-client|voicechat-volumes|category-volumes)\.properties$') { return $true }
