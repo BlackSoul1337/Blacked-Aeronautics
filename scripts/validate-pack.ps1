@@ -31,7 +31,9 @@ foreach ($file in $allFiles) {
     $relativePath = Get-RelativePackPath $file.FullName
     $lowerPath = $relativePath.ToLowerInvariant()
     if ($lowerPath -match '(^|/)(saves|logs|\.connector|\.index)(/|$)' -or
+        $lowerPath -match '(^|/)distant_horizons_server_data(/|$)' -or
         $lowerPath -match '(^|/)(servers\.dat|mods\.rar|username-cache\.json|player-volumes\.properties)$' -or
+        $lowerPath -match '\.sqlite(?:-wal|-shm)?$' -or
         $lowerPath -match '\.bak$' -or
         $lowerPath -match '^config/one-click-join$' -or
         $lowerPath -match '^config/structurify/structurify_backup_.*\.json$' -or
@@ -40,6 +42,19 @@ foreach ($file in $allFiles) {
     }
     if ($lowerPath -match 'e4mc') {
         Add-Failure "e4mc must not be included: $relativePath"
+    }
+}
+
+$distantHorizonsPath = Join-Path $packRootFullPath 'config\DistantHorizons.toml'
+if (-not (Test-Path -LiteralPath $distantHorizonsPath -PathType Leaf)) {
+    Add-Failure 'Distant Horizons config is missing.'
+}
+else {
+    $distantHorizons = Get-Content -LiteralPath $distantHorizonsPath -Raw
+    foreach ($setting in @('synchronizeOnLoad', 'enableServerGeneration', 'enableRealTimeUpdates')) {
+        if ($distantHorizons -notmatch ('(?m)^\s*' + [regex]::Escape($setting) + '\s*=\s*false\s*\r?$')) {
+            Add-Failure "Distant Horizons LOD sharing must stay disabled: $setting"
+        }
     }
 }
 

@@ -147,6 +147,20 @@ if (Test-Path -LiteralPath $voiceChatClientPath -PathType Leaf) {
     Write-Utf8NoBom $voiceChatClientPath $voiceChatClient
 }
 
+$distantHorizonsPath = Join-Path $destinationPackPath 'config\DistantHorizons.toml'
+if (-not (Test-Path -LiteralPath $distantHorizonsPath -PathType Leaf)) {
+    throw "Distant Horizons config is missing: $distantHorizonsPath"
+}
+$distantHorizons = (Get-Content -LiteralPath $distantHorizonsPath -Raw).Replace("`r`n", "`n")
+foreach ($setting in @('synchronizeOnLoad', 'enableServerGeneration', 'enableRealTimeUpdates')) {
+    $settingPattern = '(?m)^(\s*)' + [regex]::Escape($setting) + '\s*=\s*(?:true|false)\s*$'
+    if ($distantHorizons -notmatch $settingPattern) {
+        throw "Distant Horizons config is missing the server setting: $setting"
+    }
+    $distantHorizons = [regex]::Replace($distantHorizons, $settingPattern, ('$1' + $setting + ' = false'))
+}
+Write-Utf8NoBom $distantHorizonsPath $distantHorizons
+
 $quickSkinClientPath = Join-Path $destinationPackPath 'config\quickskin-client.json'
 if (Test-Path -LiteralPath $quickSkinClientPath -PathType Leaf) {
     $quickSkinClient = Get-Content -LiteralPath $quickSkinClientPath -Raw
