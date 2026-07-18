@@ -1,0 +1,47 @@
+name: Ошибка launcher или updater
+description: Сообщить о проблеме Setup, Portable, запуска или обновления
+title: "[Launcher bug]: "
+labels:
+  - "area:launcher"
+  - "type:bug"
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Версия launcher
+      placeholder: v1.1.6-ely.3
+    validations:
+      required: true
+  - type: dropdown
+    id: distribution
+    attributes:
+      label: Distribution
+      options:
+        - Setup
+        - Portable
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Шаги воспроизведения
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Ожидаемое и фактическое поведение
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Launcher или updater log
+      description: Удалите accounts, tokens, usernames и local paths.
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: Я удалил credentials и другие личные данные
+          required: true

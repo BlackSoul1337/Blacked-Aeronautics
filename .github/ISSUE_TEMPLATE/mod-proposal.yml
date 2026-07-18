@@ -1,0 +1,67 @@
+name: Предложить мод
+description: Предложить добавление, замену или удаление мода в сборке
+title: "[Mod]: "
+labels:
+  - "area:pack"
+  - "type:feature"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Проверьте существующие issues. Не прикладывайте JAR: сначала укажите официальный project URL.
+  - type: input
+    id: project
+    attributes:
+      label: Project URL
+      description: Предпочтительно Modrinth. Для другого источника обязательно укажите лицензию.
+      placeholder: https://modrinth.com/mod/example
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Версия и совместимость
+      description: Версия мода, Minecraft 1.21.1, NeoForge и необходимые dependencies.
+    validations:
+      required: true
+  - type: dropdown
+    id: side
+    attributes:
+      label: Side
+      options:
+        - Client and server
+        - Client only
+        - Server only
+        - Неизвестно
+    validations:
+      required: true
+  - type: textarea
+    id: reason
+    attributes:
+      label: Зачем мод нужен сборке
+      description: Опишите gameplay value и пересечение с существующими модами.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Риски и влияние
+      description: Производительность, world generation, network, conflicts и migration.
+    validations:
+      required: true
+  - type: input
+    id: license
+    attributes:
+      label: Лицензия
+      description: Обязательно для проекта вне Modrinth или raw JAR.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Подтверждения
+      options:
+        - label: Я не прикладываю JAR и не считаю доступность файла разрешением на распространение
+          required: true
+        - label: Я проверил существующие issues и текущий список модов
+          required: true
