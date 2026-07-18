@@ -453,7 +453,7 @@ namespace BlackedAeronauticsUpdater
 
             MessageBox.Show(
                 "Папка Portable находится слишком глубоко. Distant Horizons может не открыть свои файлы.\n\n" +
-                "Закройте лаунчер и перенесите папку Blacked-Aeronautics ближе к корню диска, например в C:\\Games.",
+                "Закройте лаунчер и перенесите папку BA ближе к корню диска, например в C:\\Games\\BA.",
                 ProductName,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
@@ -462,7 +462,7 @@ namespace BlackedAeronauticsUpdater
         private static bool NeedsShorterGamePath(string root)
         {
             string gameRoot = SafePath(root, "instances/Blacked-Aeronautics/minecraft");
-            return gameRoot.Length > 110;
+            return gameRoot.Length > 70;
         }
 
         private static string ExtractNeoForgeVersion(string packToml)

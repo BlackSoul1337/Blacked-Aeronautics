@@ -22,7 +22,7 @@ AppPublisher=BlackSoul1337
 AppPublisherURL=https://github.com/BlackSoul1337/Blacked-Aeronautics
 AppSupportURL=https://github.com/BlackSoul1337/Blacked-Aeronautics/issues
 AppUpdatesURL=https://github.com/BlackSoul1337/Blacked-Aeronautics/releases/latest
-DefaultDirName={%USERPROFILE}\Games\Blacked Aeronautics
+DefaultDirName={%USERPROFILE}\Games\BA
 DefaultGroupName=Blacked Aeronautics
 DisableProgramGroupPage=yes
 DisableDirPage=no
@@ -49,8 +49,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [CustomMessages]
 russian.CreateStartMenuIcon=Создать ярлык в меню «Пуск»
 english.CreateStartMenuIcon=Create a Start Menu shortcut
-russian.InstallPathTooLong=Выбранный путь слишком длинный для Distant Horizons.%n%nВыберите папку ближе к корню диска, например C:\Games\Blacked Aeronautics.
-english.InstallPathTooLong=The selected path is too long for Distant Horizons.%n%nChoose a folder closer to the drive root, for example C:\Games\Blacked Aeronautics.
+russian.InstallPathTooLong=Выбранный путь слишком длинный для Distant Horizons.%n%nВыберите папку ближе к корню диска, например C:\Games\BA.
+english.InstallPathTooLong=The selected path is too long for Distant Horizons.%n%nChoose a folder closer to the drive root, for example C:\Games\BA.
 
 [Tasks]
 Name: "startmenuicon"; Description: "{cm:CreateStartMenuIcon}"; GroupDescription: "{cm:AdditionalIcons}"
@@ -82,7 +82,7 @@ begin
 
   GameDirectory := AddBackslash(WizardDirValue) +
     'instances\Blacked-Aeronautics\minecraft';
-  if Length(GameDirectory) > 110 then
+  if Length(GameDirectory) > 70 then
   begin
     MsgBox(ExpandConstant('{cm:InstallPathTooLong}'), mbError, MB_OK);
     Result := False;
