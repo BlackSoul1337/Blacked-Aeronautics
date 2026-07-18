@@ -1,5 +1,7 @@
 [CmdletBinding()]
-param()
+param(
+    [string]$JavaPath
+)
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
@@ -364,7 +366,15 @@ internal static class FakeJava
         throw 'Packwiz installer path did not resolve inside the Unicode script directory.'
     }
 
-    $realJava = Join-Path $repoRoot 'jdk-21.0.11+10\bin\java.exe'
+    $realJava = if ([string]::IsNullOrWhiteSpace($JavaPath)) {
+        Join-Path $repoRoot 'jdk-21.0.11+10\bin\java.exe'
+    }
+    else {
+        [System.IO.Path]::GetFullPath($JavaPath)
+    }
+    if (-not (Test-Path -LiteralPath $realJava -PathType Leaf)) {
+        throw "Java executable was not found: $realJava"
+    }
     $realInstaller = Join-Path $repoRoot 'launcher-template\instances\Blacked-Aeronautics\minecraft\packwiz-installer.jar'
     $missingPack = [uri](Join-Path $testRoot 'missing-pack.toml')
     $previousErrorAction = $ErrorActionPreference
@@ -383,6 +393,7 @@ internal static class FakeJava
         throw 'The bundled packwiz-installer direct invocation test failed.'
     }
 
+    $global:LASTEXITCODE = 0
     Write-Host 'Updater tests passed.'
 }
 finally {
