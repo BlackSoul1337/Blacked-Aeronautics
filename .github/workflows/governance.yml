@@ -109,7 +109,7 @@ jobs:
           java-version: "21"
 
       - name: Test updater
-        shell: pwsh
+        shell: powershell
         run: ./scripts/test-updater.ps1 -JavaPath "$env:JAVA_HOME\bin\java.exe"
 
   gate:
