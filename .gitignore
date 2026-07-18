@@ -4,12 +4,7 @@
 /packwiz-installer-bootstrap.jar
 /prismlauncher_r0ymcRQUyB.png
 
-# Local-only tooling, agent instructions and generated output
-/.codex/
-/.agents/
-/.tools/
-/AGENTS.md
-/agents.md
+# Local-only tooling and generated output
 /dist/
 /devs/
 
