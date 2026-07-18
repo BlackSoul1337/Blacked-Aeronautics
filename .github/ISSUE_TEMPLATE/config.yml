@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/BlackSoul1337/Blacked-Aeronautics/security/advisories/new
+    about: Report update integrity, code execution, credential, or private-data issues privately.
