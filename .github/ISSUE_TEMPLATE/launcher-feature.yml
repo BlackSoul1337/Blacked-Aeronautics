@@ -1,0 +1,34 @@
+name: Улучшение launcher
+description: Предложить изменение launcher, updater, installer или build
+title: "[Launcher feature]: "
+labels:
+  - "area:launcher"
+  - "type:feature"
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Проблема
+      description: Какой пользовательский или maintainer workflow сейчас неудобен?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Предлагаемое решение
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Совместимость и риски
+      description: Setup, Portable, updates, user files, migration, rollback и security.
+    validations:
+      required: true
+  - type: checkboxes
+    id: agreement
+    attributes:
+      label: Перед реализацией
+      options:
+        - label: Я дождусь согласования architecture и scope до крупного PR
+          required: true
