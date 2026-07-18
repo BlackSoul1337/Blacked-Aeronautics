@@ -32,6 +32,20 @@ try {
     [System.IO.Directory]::CreateDirectory($stageRoot) | Out-Null
     [System.IO.Directory]::CreateDirectory($targetRoot) | Out-Null
 
+    $portableBuildContent = Get-Content -LiteralPath (Join-Path $repoRoot 'scripts\build-portable.ps1') -Raw
+    if ($portableBuildContent -notmatch '(?m)^\$portableFolderName = ''BA''\r?$') {
+        throw 'Portable archive root must be BA.'
+    }
+    $installerContent = Get-Content -LiteralPath (Join-Path $repoRoot 'installer\Blacked-Aeronautics.iss') -Raw
+    if ($installerContent -notmatch '(?m)^DefaultDirName=\{%USERPROFILE\}\\Games\\BA\r?$' -or
+        $installerContent -notmatch '(?m)^\s*if Length\(GameDirectory\) > 70 then\r?$') {
+        throw 'Setup must use the short BA directory and the Distant Horizons path limit.'
+    }
+    $readmeContent = Get-Content -LiteralPath (Join-Path $repoRoot 'launcher-template\README-FIRST.txt') -Raw
+    if ($readmeContent -notmatch [regex]::Escape('C:\Games\BA')) {
+        throw 'Portable extraction guidance is missing.'
+    }
+
     & (Join-Path $PSScriptRoot 'build-updater.ps1') -OutputPath $testAssembly
     Copy-Item -LiteralPath $testAssembly -Destination $helper -Force
 
@@ -96,6 +110,7 @@ try {
     $updateNeoForge = $program.GetMethod('UpdateNeoForgeManifest', [System.Reflection.BindingFlags]'Static, NonPublic')
     $migratePackwiz = $program.GetMethod('TryMigratePackwizCommand', [System.Reflection.BindingFlags]'Static, NonPublic')
     $needsShorterGamePath = $program.GetMethod('NeedsShorterGamePath', [System.Reflection.BindingFlags]'Static, NonPublic')
+    $findAsset = $program.GetMethod('FindAsset', [System.Reflection.BindingFlags]'Static, NonPublic')
     $isSetupInstall = $program.GetMethod('IsSetupInstall', [System.Reflection.BindingFlags]'Static, NonPublic')
     if ($compare.Invoke($null, @('1.1.3-ely.2', '1.1.3-ely.1')) -le 0) {
         throw 'Updater version comparison test failed.'
@@ -123,9 +138,25 @@ try {
     if (-not $isSetupInstall.Invoke($null, $setupDetectionArguments)) {
         throw 'Updater did not recognize the legacy Setup uninstall layout.'
     }
-    if (-not $needsShorterGamePath.Invoke($null, @('C:\Users\Example\AppData\Local\Programs\Blacked-Aeronautics-1.1.5-ely.1-win-x64-portable')) -or
-        $needsShorterGamePath.Invoke($null, @('C:\Games\Blacked-Aeronautics'))) {
+    if (-not $needsShorterGamePath.Invoke($null, @('C:\Users\Example\Downloads\Blacked-Aeronautics-1.1.6-ely.3-win-x64-portable\BA')) -or
+        $needsShorterGamePath.Invoke($null, @('C:\Games\BA'))) {
         throw 'Updater Distant Horizons path warning test failed.'
+    }
+    $releaseType = $assembly.GetType('BlackedAeronauticsUpdater.ReleaseInfo', $true)
+    $assetType = $assembly.GetType('BlackedAeronauticsUpdater.ReleaseAsset', $true)
+    $release = [Activator]::CreateInstance($releaseType)
+    $asset = [Activator]::CreateInstance($assetType)
+    $assetType.GetProperty('name').SetValue($asset, 'Blacked-Aeronautics-1.1.6-ely.4-win-x64-portable.zip', $null)
+    $assetListType = [System.Collections.Generic.List``1].MakeGenericType($assetType)
+    $assetList = [Activator]::CreateInstance($assetListType)
+    [void]$assetList.Add($asset)
+    $releaseType.GetProperty('assets').SetValue($release, $assetList, $null)
+    $assetArguments = New-Object 'System.Object[]' 3
+    $assetArguments[0] = $release
+    $assetArguments[1] = '1.1.6-ely.4'
+    $assetArguments[2] = '-win-x64-portable.zip'
+    if (-not [object]::ReferenceEquals($findAsset.Invoke($null, $assetArguments), $asset)) {
+        throw 'Updater release asset naming contract changed.'
     }
     $samplePack = @'
 [versions]

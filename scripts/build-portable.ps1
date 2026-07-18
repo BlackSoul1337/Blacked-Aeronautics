@@ -69,7 +69,7 @@ Assert-ChildPath $outputRootPath $repoRoot
 [System.IO.Directory]::CreateDirectory($outputRootPath) | Out-Null
 
 $artifactBaseName = "Blacked-Aeronautics-$Version-win-x64-portable"
-$portableFolderName = 'Blacked-Aeronautics'
+$portableFolderName = 'BA'
 $portableDirectory = Join-Path $outputRootPath $artifactBaseName
 $archivePath = Join-Path $outputRootPath "$artifactBaseName.zip"
 $staleSidecarPath = "$archivePath.sha256"

@@ -1619,7 +1619,7 @@ hash = "a70e09acf489e4de396855a063ad65972b515c67349cd6bcc3083918a64dc37e"
 
 [[files]]
 file = "kubejs/server_scripts/recipeConflictPatch.js"
-hash = "622b8fa3af970d75807b344290fa2c35af2788999f3ea4be771f2e53cea35c86"
+hash = "5267a76ed710e07cc0b4bf1ad2debf00941cedb2069ebf6e539e4b07384c38df"
 
 [[files]]
 file = "kubejs/server_scripts/tungstenIntegrationRecipes.js"
