@@ -393,6 +393,7 @@ internal static class FakeJava
         throw 'The bundled packwiz-installer direct invocation test failed.'
     }
 
+    $global:LASTEXITCODE = 0
     Write-Host 'Updater tests passed.'
 }
 finally {
