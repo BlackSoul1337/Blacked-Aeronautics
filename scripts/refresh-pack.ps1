@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$PackwizPath = (Join-Path $PSScriptRoot '..\.tools\packwiz\packwiz.exe'),
+    [string]$PackwizPath = (Join-Path $PSScriptRoot '..\devs\.tools\packwiz\packwiz.exe'),
     [string]$PackRoot = (Join-Path $PSScriptRoot '..\pack')
 )
 
