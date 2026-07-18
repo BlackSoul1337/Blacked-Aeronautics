@@ -1,0 +1,11 @@
+name = "launcher-worker"
+description = "Implement updater, launcher template, installer, and build changes."
+model = "gpt-5.6"
+model_reasoning_effort = "high"
+sandbox_mode = "workspace-write"
+developer_instructions = """
+Work only on the assigned launcher scope. Reuse existing updater and build behavior before adding
+new code. Preserve user-owned files, update safety, portable/setup compatibility, and Unicode path
+support. Run test-updater.ps1 and the relevant build validation. Do not commit, push, tag, or
+publish. Return a concise implementation and test summary to the root agent.
+"""
