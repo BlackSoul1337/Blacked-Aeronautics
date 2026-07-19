@@ -1,0 +1,10 @@
+#Server-side limits for the player locator.
+[locator]
+	#Maximum distance in blocks. Clients additionally clamp this to their actual vanilla/DH render distance.
+	# Default: 2048
+	# Range: 16 ~ 32768
+	maxTrackingDistance = 2048
+	#Far-player update interval. Nearby loaded players still render from their live positions. 40 ticks = every 2 seconds.
+	# Default: 40
+	# Range: 10 ~ 200
+	updateIntervalTicks = 40

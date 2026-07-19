@@ -1,0 +1,13 @@
+name = "Create: Cardboard Things 1.21.1-1.0.2"
+filename = "createcardboardthings-1.21.1-1.0.2.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/dlPwy4N0/versions/qxU8vBRl/createcardboardthings-1.21.1-1.0.2.jar"
+hash-format = "sha512"
+hash = "770b45553d6b022dbb2e7d72a9d2678174dd3603742e0ab15161b60eba890630814d49673ee338a1a96476aa730cf9a06a25d814f3c188bcc3ebde8c7b7ac2c7"
+
+[update]
+[update.modrinth]
+mod-id = "dlPwy4N0"
+version = "qxU8vBRl"

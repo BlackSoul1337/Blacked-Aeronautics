@@ -1,0 +1,13 @@
+name = "Create: Gunsmithing 1.4.8"
+filename = "create-gunsmithing-1.21.1-1.4.8.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/7KCNsGPM/versions/CP41sDUo/create-gunsmithing-1.21.1-1.4.8.jar"
+hash-format = "sha512"
+hash = "46d09279076af5cbae518925e783133a7d4a958ad9b231d69e899a618915d2b79a72bdc543d36bd5c2c5eb91fb12ef4e38c4533490fd6594f1a397cbc83985ae"
+
+[update]
+[update.modrinth]
+mod-id = "7KCNsGPM"
+version = "CP41sDUo"
