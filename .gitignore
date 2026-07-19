@@ -12,3 +12,20 @@
 .DS_Store
 Thumbs.db
 *.user
+
+
+
+# important
+pack/config/pcbind/
+
+# chat
+pack/config/NoChatReports/
+
+# csc temp
+pack/config/CSC/CSC_Warn.log
+pack/config/CSC/Log/
+pack/config/CSC/Data/
+
+# backups
+pack/config/*_backup*
+pack/config/*.bak

@@ -1,6 +1,0 @@
-{
-  "schemaVersion": 1,
-  "allowNewBindings": true,
-  "requireWhitelistForNewBindings": true,
-  "handshakeTimeoutSeconds": 10
-}
