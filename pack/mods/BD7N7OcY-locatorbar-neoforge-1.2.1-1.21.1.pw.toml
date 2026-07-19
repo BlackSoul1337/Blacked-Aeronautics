@@ -1,0 +1,13 @@
+name = "Release 1.2.1 for Neoforge 1.21.1"
+filename = "LocatorBar-neoforge-1.2.1+1.21.1.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/BD7N7OcY/versions/W26rnjoZ/LocatorBar-neoforge-1.2.1%2B1.21.1.jar"
+hash-format = "sha512"
+hash = "b41ce6cd46f580a8ec4a02e53565df8fa12d81191950d7ec1161c7867911bd0c974fb25a26ff283f15a94d39624890c2657211f23177ebc85619c3d021db7807"
+
+[update]
+[update.modrinth]
+mod-id = "BD7N7OcY"
+version = "W26rnjoZ"

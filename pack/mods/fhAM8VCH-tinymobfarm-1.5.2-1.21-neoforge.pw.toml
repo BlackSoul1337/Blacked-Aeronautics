@@ -1,0 +1,13 @@
+name = "Tiny Mob Farm Remastered NeoForge 1.21 - 1.5.2-1.21"
+filename = "tinymobfarm-1.5.2-1.21-neoforge.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/fhAM8VCH/versions/57z0vz3m/tinymobfarm-1.5.2-1.21-neoforge.jar"
+hash-format = "sha512"
+hash = "5a1110e14679f18513cf400c35410014b8a4b8868997f9c2668e9b5a819982bdb739d0c6f77ad32bccb0f484f0d2041f9a2bfccd84137054da454b864088776f"
+
+[update]
+[update.modrinth]
+mod-id = "fhAM8VCH"
+version = "57z0vz3m"

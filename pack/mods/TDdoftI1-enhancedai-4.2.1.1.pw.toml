@@ -1,0 +1,13 @@
+name = "4.2.1.1"
+filename = "enhancedai-4.2.1.1.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/TDdoftI1/versions/GF8Qllya/enhancedai-4.2.1.1.jar"
+hash-format = "sha512"
+hash = "ef2c721ba5185b78d396e255422377c8ad29a76d18d4242367632256eeb598795e9e1a0b1b1331bb9ae6997837f9e0f3da8282b648de89f95688b4c7cb751269"
+
+[update]
+[update.modrinth]
+mod-id = "TDdoftI1"
+version = "GF8Qllya"

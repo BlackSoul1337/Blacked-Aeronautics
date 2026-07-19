@@ -1,0 +1,13 @@
+name = "Create: Schematic Helper 2.0.3"
+filename = "createschematichelper-neoforge-mc1.21.1-2.0.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/vDsPXWBh/versions/ghn7StYe/createschematichelper-neoforge-mc1.21.1-2.0.3.jar"
+hash-format = "sha512"
+hash = "a490f528a063ebec2dcc6a8e88e5ce99fc86baf00df389836bb159ca8506e7cf93e37e2540731dcb44a51ca2959d45eef99c3d26ad571c305d843e9974e5d141"
+
+[update]
+[update.modrinth]
+mod-id = "vDsPXWBh"
+version = "ghn7StYe"
