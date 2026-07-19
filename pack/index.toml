@@ -2314,6 +2314,10 @@ hash = "e0bd045ddb63d4d812a6bd1f32adb5f52d87ed538f2223cf63c588d72477f199"
 metafile = true
 
 [[files]]
+file = "mods/pcbind-1.0.0-mc1.21.1-neoforge.jar"
+hash = "7d3758e7e5707144d0ba4c90d104a8f74e0ff35633445b0cfe631dc6f769bde5"
+
+[[files]]
 file = "mods/qRL8MwMB-delivery_director-1.0.1.pw.toml"
 hash = "f68d484d9c6ee778f19da95a4643a3db2435785d0acd2d5188d9ef3998b83f71"
 metafile = true

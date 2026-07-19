@@ -210,6 +210,26 @@ $approvedRawMods = @(
         Sha512 = '8c2c1baffa60d680d09e3bfeddeb5c34c6f0a1f8ae70a7f941fb51bb66de8e539a7db855de229bbc5a3c4b79535f6b3b9d1373be3941f7c9df51dfe1596428e2'
         Review = 'author-authorized binary'
     }
+    [pscustomobject]@{
+        Filename = 'cupboard-1.21.1-3.8.jar'
+        Sha512 = '0088d8be2aa5a21fce9a747e736c83dc3bacfba55df067ec3e2ae5e8b749ba1a68b6e50a1bf7ef1178088888a825de854418fb7bf778928d5b3ffa02d303bfbb'
+        Review = 'curseforge mod authored by someaddon'
+    }
+    [pscustomobject]@{
+        Filename = 'pcbind-1.0.0-mc1.21.1-neoforge.jar'
+        Sha512 = 'e82d16c1b7abea1466ef9395224a6e659aa7f2379ba886e86b391505abc6eeb84f8aeee5ff3be1eecd74a63dc5ecea088094b2a6a55a8b85d472afc9caa15af6'
+        Review = 'author-authorized binary'
+    }
+    [pscustomobject]@{
+        Filename = 'create_train_parts-0.5.0-1.21.1-6.0.10-281.jar'
+        Sha512 = 'f613baa0978cd91978f2c41168f14daa58d27ee48cdfe76132095088bc6589004401b43a3c1f075569cdcbd7d4bbd0fd68e850269eacbbb3b63b664964a1cb5f'
+        Review = 'modrinth mod authored by TiesToetToet'
+    }
+    [pscustomobject]@{
+        Filename = 'clientcrafting-1.21-2.1.jar'
+        Sha512 = '99a7a64738fe4bb1494783a414c31785364089a1cd77fba9a736cf34e85e0b0a80eacfe41f622a604bf7e8506507d69b07acab3b41240d94286460ecc1826177'
+        Review = 'curseforge mod authored by someaddon'
+    }
 )
 
 $sourceModDirectory = Join-Path $sourceMinecraft 'mods'

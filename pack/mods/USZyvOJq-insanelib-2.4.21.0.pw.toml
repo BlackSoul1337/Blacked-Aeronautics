@@ -1,0 +1,13 @@
+name = "2.4.21.0"
+filename = "insanelib-2.4.21.0.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/USZyvOJq/versions/WBSo8E5V/insanelib-2.4.21.0.jar"
+hash-format = "sha512"
+hash = "9325150c47b3c5a9b3aebca26c2a05fe1b75894b37a0082efda399389e2a93cb2ddf8bfc521e533fe1670d5671af23ab0b39f69782eb596664e390c5c8464805"
+
+[update]
+[update.modrinth]
+mod-id = "USZyvOJq"
+version = "WBSo8E5V"

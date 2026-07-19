@@ -1,0 +1,13 @@
+name = "PoopSky 1.21.1-2.0.1-hotfix"
+filename = "poopsky-1.21.1-2.0.1-hotfix.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/78EYx2mh/versions/COJL1EXj/poopsky-1.21.1-2.0.1-hotfix.jar"
+hash-format = "sha512"
+hash = "ca95c9ceaff6a11ff2512ba336704c0f8f4bb4e6bdb7b18d9c1795ae807d136febb223dd23d0ccde5a40c3983a602b3d57e9fd9c09149c9cd784a3dc6525f686"
+
+[update]
+[update.modrinth]
+mod-id = "78EYx2mh"
+version = "COJL1EXj"
