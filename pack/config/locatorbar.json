@@ -6,7 +6,7 @@
   "customOffsetY": 0,
   "viewAngle": 90.0,
   "showCoordinates": true,
-  "elementsOnXpBar": true,
+  "elementsOnXpBar": false,
   "coordinatesFormat": "XYZ",
   "showDays": false,
   "daysDisplayOrder": "DAYS_UNDER_COORDS",

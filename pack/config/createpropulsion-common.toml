@@ -1,7 +1,8 @@
 [thruster]
 	#Base thrust at redstone 15 and full obstruction efficiency for the standard thruster.
+	#Default tuned for 1000-unit thrust scale parity with Sable physics.
 	#Effective thrust uses: baseThrust * fuel_thrust_percent / 100.
-	# Default: 800.0
+	# Default: 533.333333333
 	# Range: 1.0 ~ 1.0E7
 	baseThrust = 800.0
 	#How many blocks behind the nozzle are checked for obstruction.
@@ -35,29 +36,50 @@
 	# Range: 1.0E-4 ~ 1000000.0
 	ionThrusterFePerTickAtFullThrottle = 40.0
 	#Ion thruster base thrust at redstone 15 and full obstruction efficiency.
-	# Default: 1200.0
+	#Default tuned for 1000-unit thrust scale parity with Sable physics.
+	# Default: 800.0
 	# Range: 1.0 ~ 1.0E7
 	ionThrusterBaseThrust = 1200.0
+	#Ion thruster thrust multiplier for 2x2x2 multiblock (1.30 = +30%).
+	# Default: 1.3
+	# Range: 0.01 ~ 10.0
+	ionMultiblock2xThrustMultiplier = 1.3
+	#Ion thruster thrust multiplier for 3x3x3 multiblock (1.40 = +40%).
+	# Default: 1.4
+	# Range: 0.01 ~ 10.0
+	ionMultiblock3xThrustMultiplier = 1.4
 
 ["Creative Thruster"]
 	#Starting thrust value (kN) when a creative thruster is placed.
-	# Default: 1000.0
+	#Default tuned for 1000-unit thrust scale parity with Sable physics.
+	# Default: 666.666666667
 	# Range: 1.0 ~ 1000000.0
 	creativeThrusterBaseThrust = 1000.0
 	#Maximum thrust (kN) the scroll can reach on a creative thruster.
+	#Default tuned for 1000-unit thrust scale parity with Sable physics.
 	# Default: 10000.0
 	# Range: 10.0 ~ 1000000.0
 	creativeThrusterMaxThrust = 10000.0
+	#Maximum thrust (kN) the scroll can reach on a 2x2x2 creative thruster multiblock.
+	# Default: 100000.0
+	# Range: 10.0 ~ 1.0E8
+	creativeThrusterMultiblock2x2x2MaxThrust = 100000.0
+	#Maximum thrust (kN) the scroll can reach on a 3x3x3 creative thruster multiblock.
+	# Default: 5000000.0
+	# Range: 10.0 ~ 1.0E8
+	creativeThrusterMultiblock3x3x3MaxThrust = 5000000.0
 
 [vectorThruster]
 	#Vector thruster base thrust at redstone 15 and full obstruction efficiency.
-	# Default: 1100.0
+	#Default tuned for 1000-unit thrust scale parity with Sable physics.
+	# Default: 733.333333333
 	# Range: 1.0 ~ 1.0E7
 	vectorThrusterBaseThrust = 1100.0
 
 [liquidVectorThruster]
 	#Liquid vector thruster base thrust at redstone 15 and full obstruction efficiency.
-	# Default: 1100.0
+	#Default tuned for 1000-unit thrust scale parity with Sable physics.
+	# Default: 733.333333333
 	# Range: 1.0 ~ 1.0E7
 	liquidVectorThrusterBaseThrust = 1100.0
 	#Liquid vector thruster internal fuel tank capacity in millibuckets.
@@ -97,11 +119,13 @@
 
 [creativeVectorThruster]
 	#Starting thrust value (kN) when a creative vector thruster is placed.
-	# Default: 1000.0
+	#Default tuned for 1000-unit thrust scale parity with Sable physics.
+	# Default: 666.666666667
 	# Range: 1.0 ~ 1000000.0
 	creativeVectorThrusterBaseThrust = 1000.0
 	#Maximum thrust (kN) the scroll can reach on a creative vector thruster.
-	# Default: 10000.0
+	#Default tuned for 1000-unit thrust scale parity with Sable physics.
+	# Default: 6666.666666667
 	# Range: 10.0 ~ 1000000.0
 	creativeVectorThrusterMaxThrust = 10000.0
 
@@ -116,6 +140,11 @@
 	# Default: 1.0
 	# Range: 0.0 ~ 2.0
 	atmosphericPressureAmount = 1.0
+	#Shared thrust unit scale: how many internal thrust units correspond to 1 kN.
+	#Used by physics conversion, tooltip display, and ComputerCraft kN helpers.
+	# Default: 1000.0
+	# Range: 1.0 ~ 1000000.0
+	thrustUnitsPerKn = 1000.0
 
 ["Stirling Engine"]
 	#Change this value to modify the amount of stress units produced by stirling engine. Value of 16 corresponds to 4096 SU.

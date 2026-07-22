@@ -1,0 +1,13 @@
+name = "Ember's Text API 3.0.2 (NeoForge 1.21.1)"
+filename = "emberstextapi-neoforge-1.21.1-3.0.2.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/OVSg4uGN/versions/TvwWGWfr/emberstextapi-neoforge-1.21.1-3.0.2.jar"
+hash-format = "sha512"
+hash = "21077bca4f7f18a779d18c28fcb4e87ec85959579e8f12d458bb2c6f77b84573178e6f5d8e6e609a20015819215eabb4ff69815eada91673e6ef2d6901398b0a"
+
+[update]
+[update.modrinth]
+mod-id = "OVSg4uGN"
+version = "TvwWGWfr"

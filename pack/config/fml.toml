@@ -23,4 +23,4 @@ earlyWindowSquir = false
 #Disables File Watcher. Used to automatically update config if its file has been modified.
 disableConfigWatcher = false
 #Early window provider
-earlyWindowProvider = "fmlearlywindow"
+earlyWindowProvider = "drippy_early_window"

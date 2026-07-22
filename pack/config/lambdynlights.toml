@@ -167,6 +167,12 @@ chunk_rebuild_scheduler = "culling"
 			[light_sources.settings.entities.farmersdelight]
 				rotten_tomato = true
 
+			[light_sources.settings.entities.starcatcher]
+				fishing_bob = true
+				fish = true
+				bottled_letter = true
+				broken_bottle = true
+
 			[light_sources.settings.entities.createbigcannons]
 				smoke_emitter = true
 				ap_shot = true
@@ -192,18 +198,81 @@ chunk_rebuild_scheduler = "culling"
 				bag_of_grapeshot = true
 				he_shell = true
 
+			[light_sources.settings.entities.bits_n_bobs]
+				cogwheel_chain_carriage_contraption = true
+				inert_stationary_contraption = true
+
+			[light_sources.settings.entities.cgs]
+				spear = true
+				incendiary = true
+				nail = true
+				rocket = true
+				fireball = true
+				small_rocket = true
+
+			[light_sources.settings.entities.aeronautics]
+				propeller_bearing_contraption = true
+				gust = true
+
+			[light_sources.settings.entities.create_mobile_packages]
+				robo_bee = true
+
+			[light_sources.settings.entities.ntgl]
+				grenade = true
+				tesla_projectile = true
+				continuous_laser_projectile = true
+				example_chassis = true
+				raider = true
+				arrow_like = true
+				brahmin = true
+				flying_gibs = true
+				throwable_stun_grenade = true
+				laser_projectile = true
+				missile = true
+				throwable_grenade = true
+				projectile = true
+				ash_pile = true
+				flame_projectile = true
+
+			[light_sources.settings.entities.create]
+				carriage_contraption = true
+				seat = true
+				stationary_contraption = true
+				package = true
+				contraption = true
+				gantry_contraption = true
+				super_glue = true
+				crafting_blueprint = true
+				potato_projectile = true
+
+			[light_sources.settings.entities.gravestone]
+				player_ghost = true
+
+			[light_sources.settings.entities.createcardboardthings]
+				cardboard_arrow = true
+				cardboard_ball = true
+
+			[light_sources.settings.entities.powergrid]
+				cord = true
+				string_light_cord = true
+				block_wire = true
+				hanging_wire = true
+				zap_projectile = true
+
 			[light_sources.settings.entities.simulated]
 				launched_plunger = true
 				honey_glue = true
 				contraption_diagram = true
 
+			[light_sources.settings.entities.sophisticatedbackpacks]
+				everlasting_backpack_item = true
+
 			[light_sources.settings.entities.sable_player_ragdoll]
 				ragdoll_doll = true
 				ragdoll_seat = true
 
-			[light_sources.settings.entities.bits_n_bobs]
-				cogwheel_chain_carriage_contraption = true
-				inert_stationary_contraption = true
+			[light_sources.settings.entities.createdieselgenerators]
+				chemical_sprayer_projectile = true
 
 			[light_sources.settings.entities.cbc_at]
 				cluster_projectile = true
@@ -238,12 +307,9 @@ chunk_rebuild_scheduler = "culling"
 				chest_boat = true
 				boat = true
 
-			[light_sources.settings.entities.aeronautics]
-				propeller_bearing_contraption = true
-				gust = true
-
-			[light_sources.settings.entities.create_mobile_packages]
-				robo_bee = true
+			[light_sources.settings.entities.enhancedai]
+				thrown_web = true
+				fishing_hook = true
 
 			[light_sources.settings.entities.exposure]
 				glass_photograph_frame = true
@@ -254,28 +320,38 @@ chunk_rebuild_scheduler = "culling"
 				tethered_harpoon = true
 				harpoon = true
 
+			[light_sources.settings.entities.poopsky]
+				toilet_plug = true
+				toilet_entity = true
+				fly = true
+				poop_tnt = true
+				poolime = true
+				stool_entity = true
+
 			[light_sources.settings.entities.dummmmmmy]
 				target_dummy = true
 
 			[light_sources.settings.entities.createqol]
 				statue = true
 
-			[light_sources.settings.entities.create]
-				carriage_contraption = true
-				seat = true
-				stationary_contraption = true
-				package = true
-				contraption = true
-				gantry_contraption = true
-				super_glue = true
-				crafting_blueprint = true
-				potato_projectile = true
-
-			[light_sources.settings.entities.gravestone]
-				player_ghost = true
+			[light_sources.settings.entities.tfmg]
+				green_spark = true
+				copper_grenade = true
+				thermite_grenade = true
+				spark = true
+				dry_ice_flake = true
+				napalm_bomb_entity = true
+				blue_spark = true
+				pipe_bomb = true
+				zinc_grenade = true
+				lithium_spark = true
+				napalm_potato = true
 
 			[light_sources.settings.entities.offroad]
 				borehead_contraption_entity = true
+
+			[light_sources.settings.entities.weaversparadise]
+				hanging_flag_entity = true
 
 [debug]
 	active_dynamic_lighting_cells = false

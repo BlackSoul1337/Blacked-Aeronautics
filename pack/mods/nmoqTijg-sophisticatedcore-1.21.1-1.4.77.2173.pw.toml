@@ -1,0 +1,13 @@
+name = "1.21.1-1.4.77.2173"
+filename = "sophisticatedcore-1.21.1-1.4.77.2173.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/nmoqTijg/versions/d2FntPfW/sophisticatedcore-1.21.1-1.4.77.2173.jar"
+hash-format = "sha512"
+hash = "49bac73c4e99a605fdbfe56b3314c2b2ac6dd49dbea899ca9a607717866c927ad0651c28550e946bb6b89154fa601440c437acf5837d9ab021346c5ee8afbd40"
+
+[update]
+[update.modrinth]
+mod-id = "nmoqTijg"
+version = "d2FntPfW"

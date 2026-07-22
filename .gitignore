@@ -21,10 +21,8 @@ pack/config/pcbind/
 # chat
 pack/config/NoChatReports/
 
-# csc temp
-pack/config/CSC/CSC_Warn.log
-pack/config/CSC/Log/
-pack/config/CSC/Data/
+# cfg (maybe temp)
+pack/config/
 
 # backups
 pack/config/*_backup*

@@ -43,9 +43,6 @@
 		render_debug = false
 		#Attempts to disable iris shaders in the live feed view
 		iris_off_hack = true
-		#Distant Horizons compatibility lod render quality
-		#Allowed Values: OFF, LOW, MED, HIGH
-		distant_horizons_LOD = "OFF"
 
 	[television.wave_gate]
 		#Enable FFmpeg use. This is needed if you want to use the Wave Gate

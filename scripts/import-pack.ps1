@@ -230,6 +230,11 @@ $approvedRawMods = @(
         Sha512 = '99a7a64738fe4bb1494783a414c31785364089a1cd77fba9a736cf34e85e0b0a80eacfe41f622a604bf7e8506507d69b07acab3b41240d94286460ecc1826177'
         Review = 'curseforge mod authored by someaddon'
     }
+    [pscustomobject]@{
+        Filename = 'voxy-0.2.15-beta.jar'
+        Sha512 = 'c1794969871ebd591a8bc7a3a239b0639a227d5bbd33064098ad66191aaf473b5b65e4629aca0ced7ed5a08ef669f33c819c44263a6f7049f3f7ce56e74af89b'
+        Review = 'https://github.com/m3t4f1v3/voxy/tree/mc_1211-sodium0.8.12'
+    }
 )
 
 $sourceModDirectory = Join-Path $sourceMinecraft 'mods'

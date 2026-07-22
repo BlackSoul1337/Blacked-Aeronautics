@@ -1,0 +1,13 @@
+name = "Smooth Hover 1.0"
+filename = "smooth_hover-neoforge-1.0.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/yQPKBg26/versions/jEeBcK87/smooth_hover-neoforge-1.0.jar"
+hash-format = "sha512"
+hash = "06444a144ca946b0c7eca9fb205973c32e01ab658d9256e5feb54318aef5bf22818fe57289f869fa4d0f9523b412e632b19c784a2e2ae045c777254f52cc7b58"
+
+[update]
+[update.modrinth]
+mod-id = "yQPKBg26"
+version = "jEeBcK87"

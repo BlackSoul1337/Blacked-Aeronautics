@@ -114,6 +114,7 @@ $approvedRawMods = @{
     'pcbind-1.0.0-mc1.21.1-neoforge.jar' = 'e82d16c1b7abea1466ef9395224a6e659aa7f2379ba886e86b391505abc6eeb84f8aeee5ff3be1eecd74a63dc5ecea088094b2a6a55a8b85d472afc9caa15af6'
     'create_train_parts-0.5.0-1.21.1-6.0.10-281.jar' = 'f613baa0978cd91978f2c41168f14daa58d27ee48cdfe76132095088bc6589004401b43a3c1f075569cdcbd7d4bbd0fd68e850269eacbbb3b63b664964a1cb5f'
     'clientcrafting-1.21-2.1.jar' = '99a7a64738fe4bb1494783a414c31785364089a1cd77fba9a736cf34e85e0b0a80eacfe41f622a604bf7e8506507d69b07acab3b41240d94286460ecc1826177'
+    'voxy-0.2.15-beta.jar' = 'c1794969871ebd591a8bc7a3a239b0639a227d5bbd33064098ad66191aaf473b5b65e4629aca0ced7ed5a08ef669f33c819c44263a6f7049f3f7ce56e74af89b'
 }
 if ($rawModJars.Count -ne $approvedRawMods.Count) { Add-Failure "Expected $($approvedRawMods.Count) approved raw mod JARs, found $($rawModJars.Count)." }
 foreach ($rawModJar in $rawModJars) {

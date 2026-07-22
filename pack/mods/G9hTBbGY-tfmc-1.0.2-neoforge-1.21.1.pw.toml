@@ -1,0 +1,13 @@
+name = "Create: The Factory Must Backport 1.0.2"
+filename = "tfmc-1.0.2-neoforge-1.21.1.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/G9hTBbGY/versions/uNGaShlp/tfmc-1.0.2-neoforge-1.21.1.jar"
+hash-format = "sha512"
+hash = "17d2ff4c23438b9abb3b5fddd63afa5d6b09a1c58a6b316bb26e18ae338ff6d151c53c0e4efbc0d92ccd0122ae0190d09f38325a3220268c9d1ad3ac6852178a"
+
+[update]
+[update.modrinth]
+mod-id = "G9hTBbGY"
+version = "uNGaShlp"
