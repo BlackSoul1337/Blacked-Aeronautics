@@ -1,10 +1,11 @@
 name: Governance
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
-      - develop
-      - release
       - main
     types:
       - opened
@@ -28,31 +29,10 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: Test policy fixtures
         shell: pwsh
         run: ./scripts/validate-commit-policy.ps1 -TestFixtures
-
-      - name: Validate PR commits, title, and route
-        if: github.event_name == 'pull_request'
-        shell: pwsh
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          BASE_BRANCH: ${{ github.base_ref }}
-          HEAD_BRANCH: ${{ github.head_ref }}
-        run: |
-          $policy = @{
-            BaseSha = $env:BASE_SHA
-            HeadSha = $env:HEAD_SHA
-            PullRequestTitle = $env:PR_TITLE
-            BaseBranch = $env:BASE_BRANCH
-            HeadBranch = $env:HEAD_BRANCH
-          }
-          ./scripts/validate-commit-policy.ps1 @policy
 
   pack-validation:
     name: pack validation

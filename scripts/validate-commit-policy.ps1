@@ -109,33 +109,8 @@ function Get-BranchFailures([string]$Target, [string]$Source) {
         return $failures
     }
 
-    $workingBranch = '^(feature|bugfix|hotfix|docs|chore)/[a-z0-9][a-z0-9._-]*$'
-    if ($Source -match '^(feature|bugfix|hotfix|docs|chore)/' -and
-        $Source -notmatch $workingBranch) {
-        $failures.Add("Working branch has an invalid name: $Source")
-        return $failures
-    }
-
-    $allowed = switch ($Target) {
-        'develop' {
-            $Source -eq 'release' -or
-            $Source -match '^(feature|docs|chore)/[a-z0-9][a-z0-9._-]*$' -or
-            $Source -match '^dependabot/'
-        }
-        'release' {
-            $Source -eq 'develop' -or
-            $Source -eq 'main' -or
-            $Source -match '^bugfix/[a-z0-9][a-z0-9._-]*$'
-        }
-        'main' {
-            $Source -eq 'release' -or
-            $Source -match '^hotfix/[a-z0-9][a-z0-9._-]*$'
-        }
-        default { $false }
-    }
-
-    if (-not $allowed) {
-        $failures.Add("PR route is not allowed: $Source -> $Target")
+    if ($Target -ne 'main') {
+        $failures.Add("PR target branch must be 'main', found: $Target")
     }
     return $failures
 }
@@ -180,21 +155,17 @@ function Invoke-FixtureTests {
     }
 
     $validRoutes = @(
-        @('develop', 'feature/repository-governance'),
-        @('develop', 'release'),
-        @('release', 'develop'),
-        @('release', 'bugfix/config-load'),
-        @('release', 'main'),
-        @('main', 'release'),
-        @('main', 'hotfix/update-failure')
+        @('main', 'feature/repository-governance'),
+        @('main', 'fix/config-load'),
+        @('main', 'patch-1')
     )
     foreach ($route in $validRoutes) {
         if (@(Get-BranchFailures $route[0] $route[1]).Count -ne 0) {
             throw "Valid route failed: $($route[1]) -> $($route[0])"
         }
     }
-    if (@(Get-BranchFailures 'main' 'feature/direct-production').Count -eq 0) {
-        throw 'Invalid route passed: feature/direct-production -> main'
+    if (@(Get-BranchFailures 'develop' 'feature/test').Count -eq 0) {
+        throw 'Invalid target branch passed: develop'
     }
 
     Write-Host 'Commit policy fixtures passed.'

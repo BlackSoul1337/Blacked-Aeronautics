@@ -8,22 +8,29 @@
 /dist/
 /devs/
 
-# IDE / OS noise
+# IDE, OS, C# build noise
 .DS_Store
 Thumbs.db
+.vs/
+bin/
+obj/
 *.user
+*.suo
+*.userosv
 
-
-
-# important
-pack/config/pcbind/
-
-# chat
-pack/config/NoChatReports/
-
-# cfg (maybe temp)
+# Config runtime noise & temporary files
 pack/config/
-
-# backups
 pack/config/*_backup*
 pack/config/*.bak
+pack/config/**/*.bak
+pack/config/**/*.tmp
+pack/config/**/*.log
+pack/config/structurify/structurify_backup_*.json
+pack/config/quickskin/uploads/
+pack/config/e4mc/
+pack/config/one-click-join
+pack/config/voicechat/username-cache.json
+pack/config/voicechat/player-volumes.properties
+pack/config/almostunified/debug.json
+pack/config/almostunified/duplicates.json
+pack/config/crash_assistant/modlist.json

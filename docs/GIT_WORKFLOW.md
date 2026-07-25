@@ -1,74 +1,29 @@
-# Gitflow Blacked Aeronautics
+# Git Workflow Blacked Aeronautics
 
-В проекте используются три постоянные ветки и короткие рабочие ветки. Production-ветка
-называется `main`: переименование в `master` сломало бы существующие Pages и CDN-ссылки
-`@main`.
+В проекте используется простая модель разработки с основной веткой `main` (без многоуровневого GitFlow).
 
-## Постоянные ветки
+## Основная ветка
 
-| Ветка | Назначение | Допустимые источники PR |
-|---|---|---|
-| `main` | Проверенное production-состояние и источник Pages | `release`, `hotfix/*` |
-| `release` | Стабилизация и ручное тестирование release-кандидата | `develop`, `bugfix/*`, `main` |
-| `develop` | Интеграция следующей версии | `feature/*`, `docs/*`, `chore/*`, `release` |
+- `main` — единая стабильная ветка репозитория, являющаяся источником публикации для GitHub Pages и обновлений packwiz.
 
-`develop` является default branch на GitHub. Прямые push, force-push и удаление постоянных
-веток запрещены.
+Разработка ведется прямо в `main` или через небольшие тематические ветки (feature/fix/chore), направляемые в `main`.
 
-## Рабочие ветки
+## Ветки для работы
 
-| Префикс | Создавать от | PR направлять в | Когда использовать |
-|---|---|---|---|
-| `feature/*` | `develop` | `develop` | Новая возможность |
-| `docs/*` | `develop` | `develop` | Только документация |
-| `chore/*` | `develop` | `develop` | CI, tooling, зависимости и обслуживание |
-| `bugfix/*` | `release` | `release` | Исправление найденного на staging дефекта |
-| `hotfix/*` | `main` | `main` | Срочное исправление production |
+При создании веток от `main` используйте понятные имена:
 
-После префикса используется короткий lowercase slug: `feature/mod-browser`,
-`bugfix/pack-download`, `hotfix/update-loop`. При наличии issue желательно добавить номер:
-`feature/42-mod-browser`.
+- `feat/short-name` или `feature/short-name` — новая возможность
+- `fix/short-name` — исправление дефекта
+- `chore/short-name` — обслуживание, зависимости или инфраструктура
 
-## Обычная разработка
+## Процесс разработки
 
-1. Обновить `develop` и создать от неё `feature/*`, `docs/*` или `chore/*`.
-2. Сделать небольшие Conventional Commits и открыть PR в `develop`.
-3. Дождаться `Governance / gate` и review.
-4. Использовать squash merge. Итоговый commit получает Conventional title PR.
+1. Сделайте необходимые изменения.
+2. Проверьте пак через `.\scripts\validate-pack.ps1`.
+3. Создайте информативный коммит (рекомендуется Conventional Commit формат, например `chore(pack): refresh mods`).
+4. Отправьте изменения напрямую в `main` или создайте Pull Request в `main`.
 
-Прямой `feature/* → main` или `feature/* → release` блокируется CI.
+## Публикация и релизы
 
-## Подготовка production
-
-1. Открыть PR `develop → release` с title вида
-   `chore(release): promote develop to staging`.
-2. Использовать merge commit, чтобы сохранить ancestry постоянных веток.
-3. На `release` выполнять только стабилизацию. Новые feature туда не добавлять.
-4. Исправления создавать как `bugfix/*` от `release` и squash-merge обратно.
-5. После bugfix открыть back-sync PR `release → develop`.
-6. После успешного тестирования открыть PR `release → main` и использовать merge commit.
-
-Pack-only merge в `main` запускает Pages и не создаёт launcher tag или GitHub Release.
-Изменение launcher distribution выпускается существующим тегом `vX.Y.Z-ely.N` и только после
-полной проверки Setup и Portable.
-
-## Hotfix
-
-1. Создать `hotfix/*` от актуального `main`.
-2. Открыть PR в `main` и выполнить проверки.
-3. После merge синхронизировать `main → release`.
-4. Затем синхронизировать `release → develop`.
-
-Hotfix не переносится cherry-pick в каждую ветку: merge постоянных веток сохраняет единое
-происхождение исправления.
-
-## Merge policy
-
-- Короткие ветки: squash merge.
-- Promotion и back-sync постоянных веток: merge commit.
-- Rebase merge отключён.
-- PR title обязан соответствовать [правилам commits](COMMITS.md).
-- Conversations должны быть resolved, stale approvals сбрасываются.
-- После merge короткая ветка удаляется автоматически.
-- System-generated `Merge pull request ...` commits являются единственным исключением из
-  Conventional header.
+- Пуш в `main` автоматически запускает GitHub Actions workflow (`pages.yml`), обновляющий сборку на GitHub Pages.
+- При релизе дистрибутивов лаунчера создается тег `vX.Y.Z-ely.N` и GitHub Release через `gh release create`.

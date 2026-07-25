@@ -16,7 +16,7 @@ Closes #
 
 ## Проверка
 
-- [ ] PR направлен в target, разрешённый Gitflow
+- [ ] PR направлен в ветку `main`
 - [ ] PR title и commits используют `<type>(<scope>): <English subject>`
 - [ ] В diff нет accounts, worlds, servers, secrets, local paths или cache
 - [ ] Я проверил точный diff и не включил unrelated changes

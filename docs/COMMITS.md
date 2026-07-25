@@ -53,7 +53,7 @@
 ```text
 feat(pack): add navigation mod metadata
 fix(launcher): prevent incomplete first update
-docs(repo): explain the Gitflow promotion path
+docs(repo): explain main branch workflow
 test(updater): cover Java path override
 ci(ci): add the governance gate
 chore(deps): update the pinned action version
