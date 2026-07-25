@@ -42,7 +42,7 @@ launcher release. Укажите в PR, какие из них удалось п
 
 ## Pull Request
 
-Обычная launcher feature создаётся от `develop` и направляется обратно в `develop`. В PR:
+Обычная launcher feature создаётся от `main` и направляется обратно в `main`. В PR:
 
 - свяжите согласованную issue;
 - опишите user impact, migration и rollback;
