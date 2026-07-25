@@ -235,6 +235,11 @@ $approvedRawMods = @(
         Sha512 = 'c1794969871ebd591a8bc7a3a239b0639a227d5bbd33064098ad66191aaf473b5b65e4629aca0ced7ed5a08ef669f33c819c44263a6f7049f3f7ce56e74af89b'
         Review = 'https://github.com/m3t4f1v3/voxy/tree/mc_1211-sodium0.8.12'
     }
+    [pscustomobject]@{
+        Filename = 'Translator-1.21.1-NeoForge-1.0.0.jar'
+        Sha512 = '4f5a540d9e02e8d885fc132c4740db2c3b3d4388b75b00b3285c496d072076a13d8944a282f7042c52329af904808b3974bfc18d70128fa6a14c80c4e2d55e8d'
+        Review = 'author-authorized binary'
+    }
 )
 
 $sourceModDirectory = Join-Path $sourceMinecraft 'mods'

@@ -98,6 +98,10 @@
   "gravestone": {
     "grave": true
   },
+  "translatorpp": {
+    "entity_translation": true,
+    "block_translation": true
+  },
   "balm": {
     "jade": true
   }
