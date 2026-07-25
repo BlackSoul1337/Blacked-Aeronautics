@@ -1,0 +1,13 @@
+name = "Create-Aeronautics:Compatibility + Bug fixes 1.6.8"
+filename = "fucksable-1.6.8.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/YS1hdEUp/versions/lHPHt1gT/fucksable-1.6.8.jar"
+hash-format = "sha512"
+hash = "d20b3b6f53a7876f4428cb43e555cb7be576e739342d935546e4e628aca09850f3497d6860bb34d6a0ba0d4bb0483e75723ddda8b08e967d0de60d95faa75485"
+
+[update]
+[update.modrinth]
+mod-id = "YS1hdEUp"
+version = "lHPHt1gT"

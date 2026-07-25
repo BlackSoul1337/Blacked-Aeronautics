@@ -92,5 +92,7 @@
   "sable_player_ragdoll:ragdoll_part": null,
   "sable_player_ragdoll:ragdoll_part_data": null,
   "sablejade:physics_tooltip": null,
-  "storagedrawers:main": null
+  "storagedrawers:main": null,
+  "translatorpp:block_translation": null,
+  "translatorpp:entity_translation": null
 }

@@ -2,7 +2,7 @@ hash-format = "sha256"
 
 [[files]]
 file = "config/CSC/Data/variables.data"
-hash = "c4112a6f67a3756132bd4a5066373afe1672a318767a9d3c5ce035769a5a49f1"
+hash = "52516ae23ba270a07fcaec29667f5df6eec7c7e7c2a9a5272c0a8f8a0e3406bd"
 
 [[files]]
 file = "config/CSC/backup/BlackSoul1338/2026_07_21_20_16shahed_136.nbt"
@@ -375,7 +375,7 @@ hash = "55406dc103678dc459c50fbb85bcdc7b9e7421576b4ee56e57344dd6c79cf140"
 
 [[files]]
 file = "config/bits_n_bobs-common.toml"
-hash = "2c52ae67420c26b772580e8e058cb2cae20a7d5c06b326d8f2547c39ace59ffb"
+hash = "21bcb5ee7efecbce458408fa5048f3ea9507bf2643760e21c841a05637a6cb5a"
 
 [[files]]
 file = "config/bits_n_bobs-server.toml"
@@ -395,7 +395,7 @@ hash = "0f77a8f879355f4115a894acb56161a164d826ce8af335f0522cdd0f8d0d9a52"
 
 [[files]]
 file = "config/c2me.toml"
-hash = "07799dc59869cb91efd4fbd5a6f566b9894354435606e6914952e1a0525a944e"
+hash = "c25ef38f6caabaf0f1f01c7c1573c82fa6ad9a5ab3f472b6389ff9a7d6fc649f"
 
 [[files]]
 file = "config/cardboardchalkbox-common.toml"
@@ -434,8 +434,16 @@ file = "config/chat_heads.json5"
 hash = "e198750061411cf7fca624e38b894ca104ca2cf2c2940da0409ce4240dcc2503"
 
 [[files]]
+file = "config/chat_tools.json"
+hash = "ea528493651f690a756ba5c0e7011dd2de0e924d8875d01f05cbb9e1255f9cc6"
+
+[[files]]
 file = "config/chatanimation.json"
 hash = "fa8eebf200c797ea7f62eb932f3eee7dfa50356daccd7a5dff8017827215e8d9"
+
+[[files]]
+file = "config/chattranslator-client.toml"
+hash = "6e4999ec62abfbb07b23db952a06c946ae2c0a6a6b306040719e5b34c7c572dc"
 
 [[files]]
 file = "config/chloride-client.toml"
@@ -443,7 +451,7 @@ hash = "374d340760b71e1657310312ec23bc7d77bcc2c54fbc3ed5b36e1ca939e66792"
 
 [[files]]
 file = "config/chloride-client.toml_backup1"
-hash = "18ec050d9a911f6205d7f2c4bc84a75b38740fa4b3a48f08433816507c0e8b92"
+hash = "8657f5c90e48e807cdc830c98afeba99e7203954cf16c2b5b42b930fe436422a"
 
 [[files]]
 file = "config/chloride-client.toml_backup2"
@@ -1003,75 +1011,7 @@ hash = "764b1720967b62495fb809a1c7b050e07247cb32af2c15ab9efcb35add1e9f50"
 
 [[files]]
 file = "config/fabric/indigo-renderer.properties"
-hash = "9788f8f8f7180634eb5f900644394d05581fe44e9710f7b0413dfa5a218dc8da"
-
-[[files]]
-file = "config/fancymenu/custom_gui_screens.txt"
-hash = "ff492043eaf454c46e949d5eef32ece90cc5a19feb50a161dd29a43b5732c880"
-
-[[files]]
-file = "config/fancymenu/customizablemenus.txt"
-hash = "3a41927d8fe3776ff669fc9aabf204d13bd322e32190c7b4d846b10ce08c2384"
-
-[[files]]
-file = "config/fancymenu/customization/drippy_loading_overlay_layout.txt"
-hash = "f50950b82eaa639f57da0fe23229a675e52ae5187f4baddedd188008c52c9c60"
-
-[[files]]
-file = "config/fancymenu/customization/title_screen_layout.txt"
-hash = "6a43dd4106dbc9309b6a0efadb3ac0f682fe77e63daee7e593b4fe05787682e1"
-
-[[files]]
-file = "config/fancymenu/layout_editor/widgets/element_layer_control.lewidget"
-hash = "051d700ea7ff1bd626063d60f9a9cd65a0af1fed5903706d1e70fce20bcb2495"
-
-[[files]]
-file = "config/fancymenu/legacy_checklist.txt"
-hash = "9a25d3dc708e43eabafce5479a13c02dae15bc7f673afb2745b8b2ba48a97dc0"
-
-[[files]]
-file = "config/fancymenu/options.txt"
-hash = "def12ba097c22480bbb6ae6b1f1944783829681964cdec15901dcf7d083f33fb"
-
-[[files]]
-file = "config/fancymenu/ui_themes/cherry_blossom.json"
-hash = "993c16664fe2d1b9e8ad107bf1c19c1dbb244729c403ed058ca2e54616dc5452"
-
-[[files]]
-file = "config/fancymenu/ui_themes/cozy_campfire.json"
-hash = "1e7505231b9d99e6315845043ce810dfc7004ce1d8f5a4ceddb4ecb96c03ac50"
-
-[[files]]
-file = "config/fancymenu/ui_themes/dark.json"
-hash = "01e2a3b5d250c0259a7f97f0d353785bfeab6d7ee2e147c16bb910f1d23e9498"
-
-[[files]]
-file = "config/fancymenu/ui_themes/dark_high_contrast.json"
-hash = "54316a2b309ddb472b9133f8ccb8694dce9b57be6ebcfb3c2e9d1bbfdade3f26"
-
-[[files]]
-file = "config/fancymenu/ui_themes/light.json"
-hash = "a05e95f7b62f338049fe0045d9a6a50060d3aba52d5ab83ac1ed6ff55cac1153"
-
-[[files]]
-file = "config/fancymenu/ui_themes/light_high_contrast.json"
-hash = "7c96ba2f2cb4d59d20eaf88960de7a9308ce8a3460c4e1757e07c42e174ea65a"
-
-[[files]]
-file = "config/fancymenu/ui_themes/pumpkin_soup.json"
-hash = "7c6a5d5b19e53ca2f88371c2e867f51339b045697aab29864df5877a6bba9311"
-
-[[files]]
-file = "config/fancymenu/ui_themes/purple_void.json"
-hash = "fa63577441fd576ebac90ecf06b7ded376cbf80ca5103d398bc9a73a25c6c2c0"
-
-[[files]]
-file = "config/fancymenu/ui_themes/spooky_season.json"
-hash = "cfa46554bbb027efe3c2184a073ee652000acac2500cd5136764f901355ec0cd"
-
-[[files]]
-file = "config/fancymenu/user_variables.db"
-hash = "3d7d4cda73d6bde134a568ccbe4e8d2e7fbe701570012b71fa45acdb2258c823"
+hash = "462dfec2b366a7a67e426c1c1ee830c5e8bbc76497f278a358cc7ee73f66e84c"
 
 [[files]]
 file = "config/fancytoasts/general.json"
@@ -1120,6 +1060,14 @@ hash = "8e872a2a2fd5008ce64109679249bd6a2ec49d719fa825ed9ec8bc5657ee04f3"
 [[files]]
 file = "config/forge-client.toml"
 hash = "0b1b3c45343435184c9dde3149b38afcdb97953e287686ecda54385f53ebcddc"
+
+[[files]]
+file = "config/fucksable/lang/en.yml"
+hash = "4948c21f2023e5a25cd12d742a6438a754aa91f8c747cb153b951c4549dcd84c"
+
+[[files]]
+file = "config/fucksable/lang/zh.yml"
+hash = "2cbc5bb621f50fbb88e9e40c1411dbac3ecef50c7697b996b770d6a0d739169c"
 
 [[files]]
 file = "config/fzzy_config/keybinds.toml"
@@ -1183,7 +1131,7 @@ hash = "4d3264b58c502afaeca3f44e8d2db0843c54b8ba957afd21a2d450fe10dafefb"
 
 [[files]]
 file = "config/iris.properties"
-hash = "78e5d3c3ecd4999e004e266399fa51a20d042cab4f08c67cf71d5c1aa0a82232"
+hash = "94beef5d1ef2e4d5a0de19a67fce5deb368269f71277cbab5f1b521cc3ae06cd"
 
 [[files]]
 file = "config/irisflw-client.toml"
@@ -1211,11 +1159,11 @@ hash = "28e688370793f2ad504e94f8d56613485d29c140fd41e607a542a838f06b2060"
 
 [[files]]
 file = "config/jade/plugins.json"
-hash = "52a0f510339ba0afa3fd7d3cc07cea4b597732e0ba4038603d9cbd3cad207d3a"
+hash = "64259a12f1da48ed4944334f611fe7b543b03f1c21cf9235afea5ed19c682a73"
 
 [[files]]
 file = "config/jade/sort-order.json"
-hash = "c3b8ce134a2e3f94fb4835c7337ba0194aedc082f961e2a4b16e62ab59844cc4"
+hash = "92ec8c4c666b4dd8d33b9346086b227c4b8a57eefeae0d8ab8d68404c8db46e3"
 
 [[files]]
 file = "config/jei-server.toml"
@@ -1519,7 +1467,7 @@ hash = "d5f0ed8390618c769d9cb40a77df04779b7bbe636343b753c1ed6f92d325ae2b"
 
 [[files]]
 file = "config/packetfixer.properties"
-hash = "f09cc4867b41b28214d9f75b9f195b630413fb5bcf1d97aa099965fd8838a7a0"
+hash = "bf7e9dad4ce11a6b78d672c4b0aef996fc6936499afe7000914a5a61548277c6"
 
 [[files]]
 file = "config/particle_core_config.toml"
@@ -1776,7 +1724,7 @@ hash = "12f65a872b73c931b0a192d7e95c7d89f7ef7f1fd33f3ee7ff6bbda12fb8845f"
 
 [[files]]
 file = "config/sophisticatedcore-common.toml"
-hash = "826af26deb9d224a9a91dfdade2c2ea619799bec4a93985331801b9b119b867f"
+hash = "688b3b3f34b65bcf36cbc52a41e1ac0431affcc7beaeecaa3799a1cbe4d4b95c"
 
 [[files]]
 file = "config/sound_physics_remastered/occlusion.properties"
@@ -1909,6 +1857,14 @@ hash = "c58c977b091df5c5d61e1c353c7c3c01b4a8070243608e53c3b5ed431a57a817"
 [[files]]
 file = "config/transition.json"
 hash = "6c0060c7301372bbc414f86a139b383e34fb620f0621badd71bb19efc3f26767"
+
+[[files]]
+file = "config/translator-client.toml"
+hash = "ee54644f244e1870f00c8273788901d98f1158f98467bc253aeb2d7af1a7af26"
+
+[[files]]
+file = "config/translatorpp.toml"
+hash = "82e66213f93bb696848512aeeaac50a799c5148561da1c56af8e32007a3410dd"
 
 [[files]]
 file = "config/trender.json"
@@ -2748,6 +2704,10 @@ hash = "16d8bf88ee9d94ef98defdfa20fb68160a208bcabc0297eff2e6a419eb1c9371"
 metafile = true
 
 [[files]]
+file = "mods/Translator-1.21.1-NeoForge-1.0.0.jar"
+hash = "f0da50da571106071129bd32e185190933c8d5a80739e9533b3ca39dc34af2f3"
+
+[[files]]
 file = "mods/TyCTlI4b-sophisticatedbackpacks-1.21.1-3.25.71.1997.pw.toml"
 hash = "20006c9e7be1f0a0b2b96478cc0de94ae68d8f333c8ba3a93965e30b7111b457"
 metafile = true
@@ -2855,6 +2815,11 @@ metafile = true
 [[files]]
 file = "mods/YL57xq9U-iris-neoforge-1.8.14-beta.1-mc1.21.1.pw.toml"
 hash = "ce8c6af2472e204dcbe1cde6373894beaa6f31140e6917f149c8305dec4f42de"
+metafile = true
+
+[[files]]
+file = "mods/YS1hdEUp-fucksable-1.6.8.pw.toml"
+hash = "4430061f9353ab5fe56f21cdd60fbafb4333ebf5a3604533c984846b988ea8ce"
 metafile = true
 
 [[files]]
@@ -3478,7 +3443,7 @@ metafile = true
 [[files]]
 file = "options.txt"
 preserve = true
-hash = "22c33c8e38c124afc7144121fe026c223c549df3d2ec1bfbcb5af7741008f48a"
+hash = "e4f73f4fccfc69f3f1c872cfe8300ca29c31667239558f51c73b97ec2b429be3"
 
 [[files]]
 file = "resourcepacks/6SLU7tS5-default-dark-mode-1.20.2--2025.5.0.pw.toml"
