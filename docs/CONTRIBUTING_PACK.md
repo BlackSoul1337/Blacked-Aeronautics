@@ -37,7 +37,7 @@ Maintainer добавляет approved filename и SHA-512 в `scripts/validate-
 
 ## Подготовка изменения
 
-Создайте `feature/*` от `develop`. Не запускайте maintainer-only
+Создайте `feature/*` от `main`. Не запускайте maintainer-only
 `scripts/import-pack.ps1`: он читает локальную read-only Prism instance и предназначен для
 полной синхронизации владельцем проекта.
 
@@ -67,7 +67,7 @@ git diff
 
 ## Pull Request
 
-PR направляется в `develop` и получает `area:pack`. В описании перечислите:
+PR направляется в `main` и получает `area:pack`. В описании перечислите:
 
 - добавленные, обновлённые и удалённые моды;
 - dependencies и configuration changes;
@@ -76,4 +76,4 @@ PR направляется в `develop` и получает `area:pack`. В о�
 - изменение NeoForge, если оно есть.
 
 Pack-only PR не изменяет launcher version, не строит Setup/Portable и не создаёт GitHub Release.
-Игроки получают pack только после promotion в `main` и успешного Pages deployment.
+Игроки получают pack после слияния в `main` и успешного Pages deployment.

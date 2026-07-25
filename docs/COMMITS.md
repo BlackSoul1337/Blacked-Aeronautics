@@ -33,7 +33,7 @@
 | `launcher` | ElyPrism template и launcher integration |
 | `updater` | C# updater и update process |
 | `installer` | Inno Setup, Portable и packaging |
-| `release` | Версии, promotion и distribution metadata |
+| `release` | Версии, релизы и distribution metadata |
 | `ci` | Workflows и CI-only scripts |
 | `deps` | Обновление зависимостей |
 
@@ -75,7 +75,7 @@ chore(deps): update the pinned action version
 - длину строк и завершающую пунктуацию;
 - распространённые формы прошедшего времени;
 - PR title;
-- допустимое направление head/base веток.
+- целевую ветку `main` для PR.
 
 Полностью определить грамматическое время автоматически невозможно, поэтому reviewer также
 проверяет английский язык и imperative/present form.
