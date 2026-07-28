@@ -2,7 +2,7 @@ hash-format = "sha256"
 
 [[files]]
 file = "config/CSC/Data/variables.data"
-hash = "52516ae23ba270a07fcaec29667f5df6eec7c7e7c2a9a5272c0a8f8a0e3406bd"
+hash = "8a3372323154fae90ab03c962292aace4283b6d81db1e129cb9cae521dcfaa79"
 
 [[files]]
 file = "config/CSC/backup/BlackSoul1338/2026_07_21_20_16shahed_136.nbt"
@@ -35,6 +35,14 @@ hash = "ddbf02bb2d80fa8f384edd59da9e023236255c3dc81e348c5a34c711045e0f7e"
 [[files]]
 file = "config/CSC/backup/BlackSoul1338/2026_07_21_21_06flyingfish.nbt"
 hash = "cc659eed9513e80926a041b0f5cbc5546262b6d87851a1eade47830618c8a093"
+
+[[files]]
+file = "config/CSC/backup/BlackSoul1338/2026_07_27_04_02_.nbt"
+hash = "7e3fc35a1a48fc0868ebf60a4734dcbdfb8a1c1d8fc90d1ddb17c87d73e37620"
+
+[[files]]
+file = "config/CSC/backup/BlackSoul1338/2026_07_27_04_03_.nbt"
+hash = "7e3fc35a1a48fc0868ebf60a4734dcbdfb8a1c1d8fc90d1ddb17c87d73e37620"
 
 [[files]]
 file = "config/CSC/config.toml"
@@ -1011,7 +1019,7 @@ hash = "764b1720967b62495fb809a1c7b050e07247cb32af2c15ab9efcb35add1e9f50"
 
 [[files]]
 file = "config/fabric/indigo-renderer.properties"
-hash = "462dfec2b366a7a67e426c1c1ee830c5e8bbc76497f278a358cc7ee73f66e84c"
+hash = "5ca0d5988af8a72f7afe654d4f76b130dc3e9b5752d177e4984530003a7a9a8d"
 
 [[files]]
 file = "config/fancytoasts/general.json"
@@ -1131,7 +1139,7 @@ hash = "4d3264b58c502afaeca3f44e8d2db0843c54b8ba957afd21a2d450fe10dafefb"
 
 [[files]]
 file = "config/iris.properties"
-hash = "94beef5d1ef2e4d5a0de19a67fce5deb368269f71277cbab5f1b521cc3ae06cd"
+hash = "7c3ee17375d26eaf3eee8626f431abe5f63bd53ac61f280fc1da4ff19c140471"
 
 [[files]]
 file = "config/irisflw-client.toml"
@@ -1255,6 +1263,10 @@ hash = "12174fd2e7b7105aa4aa98a486df7baa470fd770ff30a731cf314c4fd571701a"
 
 [[files]]
 file = "config/litematica/litematica_1337.tralalero.vip_dim_minecraft_overworld.json"
+hash = "adcadb841e38244e0121845e5c11366cb7fca48d1e6518db75eb8369eb9cc582"
+
+[[files]]
+file = "config/litematica/litematica_1337.tralalero.vip_dim_minecraft_the_nether.json"
 hash = "adcadb841e38244e0121845e5c11366cb7fca48d1e6518db75eb8369eb9cc582"
 
 [[files]]
@@ -1467,7 +1479,7 @@ hash = "d5f0ed8390618c769d9cb40a77df04779b7bbe636343b753c1ed6f92d325ae2b"
 
 [[files]]
 file = "config/packetfixer.properties"
-hash = "bf7e9dad4ce11a6b78d672c4b0aef996fc6936499afe7000914a5a61548277c6"
+hash = "d45db43238bc7f7492dd31a2063a2456e132156ce5a783d45ac263a416054432"
 
 [[files]]
 file = "config/particle_core_config.toml"
@@ -1860,7 +1872,7 @@ hash = "6c0060c7301372bbc414f86a139b383e34fb620f0621badd71bb19efc3f26767"
 
 [[files]]
 file = "config/translator-client.toml"
-hash = "ee54644f244e1870f00c8273788901d98f1158f98467bc253aeb2d7af1a7af26"
+hash = "e4f3cfe58ad3e160a14821594a417444abd599337604881cb6802275173f2a16"
 
 [[files]]
 file = "config/translatorpp.toml"
@@ -2743,6 +2755,11 @@ hash = "afcf189d84bdc9a7b2b1724d1a8a3ae9901e76036cca4a4ce0efcb3d99a9682a"
 metafile = true
 
 [[files]]
+file = "mods/UwzQRF4j-obbcrashfix-1.0.0.pw.toml"
+hash = "0a9d346dcc6a1e915727d6a68b52a7e9d652c764e6d11be6d55ae922a3dfa414"
+metafile = true
+
+[[files]]
 file = "mods/Vg5TIO6d-create_connected-1.3.2-mc1.21.1.pw.toml"
 hash = "85cb8b96d495db48140c04a8c1f7860780eda6ea42d33394187f765507da47b7"
 metafile = true
@@ -3443,7 +3460,7 @@ metafile = true
 [[files]]
 file = "options.txt"
 preserve = true
-hash = "e4f73f4fccfc69f3f1c872cfe8300ca29c31667239558f51c73b97ec2b429be3"
+hash = "92d872a18b03bcd228109f9c40eebcdcd052604e42db03c72e331e93167aaccc"
 
 [[files]]
 file = "resourcepacks/6SLU7tS5-default-dark-mode-1.20.2--2025.5.0.pw.toml"
